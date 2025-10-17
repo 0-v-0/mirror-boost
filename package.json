@@ -1,0 +1,16 @@
+{
+  "name": "mirror-boost",
+  "private": true,
+  "version": "0.0.1",
+  "description": "An extension to optimize the loading speed of styles, scripts, and icons by replacing slow-loading resources with those from mirror servers.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "typescript": "^5.9.3"
+  },
+  "type": "module"
+}
