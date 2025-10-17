@@ -1,32 +1,34 @@
 {
-  "name": "Mirror Boost",
-  "version": "0.1",
-  "description": "An extension to optimize the loading speed of styles, scripts, and icons by replacing slow-loading resources with those from mirror servers.",
-  "icons": {
-    "16": "icons/icon.svg",
-    "48": "icons/icon.svg",
-    "128": "icons/icon.svg"
-  },
-  "action": {
-    "default_icon": {
-      "16": "icons/icon.svg"
-    }
-  },
-  "options_ui": {
-    "page": "src/options.html"
-  },
-  "background": {
-    "service_worker": "src/background.js",
-    "type": "module"
-  },
-  "permissions": [
-    "declarativeNetRequestWithHostAccess",
-    "scripting",
-    "storage",
-    "tabs",
-    "unlimitedStorage",
-    "webNavigation"
-  ],
-  "host_permissions": ["*://*/*"],
-  "manifest_version": 3
+    "name": "Mirror Boost",
+    "version": "0.1",
+    "description": "An extension to optimize the loading speed of styles, scripts, and icons by replacing slow-loading resources with those from mirror servers.",
+    "icons": {
+        "16": "icons/icon.svg",
+        "48": "icons/icon.svg",
+        "128": "icons/icon.svg"
+    },
+    "action": {
+        "default_icon": {
+            "16": "icons/icon.svg"
+        }
+    },
+    "options_ui": {
+        "page": "src/options.html"
+    },
+    "background": {
+        "service_worker": "src/background.js",
+        "type": "module"
+    },
+    "permissions": [
+        "declarativeNetRequestWithHostAccess",
+        "scripting",
+        "storage",
+        "tabs",
+        "unlimitedStorage",
+        "webNavigation"
+    ],
+    "host_permissions": [
+        "*://*/*"
+    ],
+    "manifest_version": 3
 }
