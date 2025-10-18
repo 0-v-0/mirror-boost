@@ -1,0 +1,29 @@
+{
+	"compilerOptions": {
+		"module": "esnext",
+		"lib": [
+			"es2023",
+			"dom",
+			"dom.iterable"
+		],
+		"allowJs": false,
+		"baseUrl": "./src",
+		"declaration": true,
+		"emitDeclarationOnly": true,
+		"outDir": "./types",
+		"strict": true,
+		"isolatedModules": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noImplicitReturns": true,
+		"moduleResolution": "node",
+		"esModuleInterop": true,
+		"experimentalDecorators": true,
+		"target": "es2023",
+		"useDefineForClassFields": true,
+		"skipLibCheck": true
+	},
+	"include": [
+		"src/**/*"
+	]
+}
