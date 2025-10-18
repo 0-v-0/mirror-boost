@@ -4,7 +4,7 @@
 
 ## 1. MVP 范围（必须实现）
 
-- 资源监控：采集页面中带 `integrity` 的静态资源（`script`、`link[rel=stylesheet]`、`img`/图标）的加载时间，使用 Resource Timing API 或 load 事件获取时间戳。
+- 资源监控：采集页面中带 `integrity` 的静态资源（`script`、`link[rel=stylesheet]`、`link[rel=icon]`）的加载时间，使用 Resource Timing API 或 load 事件获取时间戳。
 - 统计聚合：按 URL 匹配规则（初期可只实现按 host 聚合）进行样本计数与平均加载时间计算，支持最小样本数配置（默认3）。
 - 阈值判断：支持配置阈值（默认300ms），当聚合 avgMs >= 阈值且样本数足够时触发替换判断。
 - 安全替换：仅对带 `integrity` 的资源尝试替换；替换通过创建替代元素（保留原 integrity 属性）并监听 load/error 确认成功或失败。失败时回退到原资源。
@@ -24,7 +24,7 @@
 优先级高 -> 先实现核心流程，低风险回退。给出建议实现顺序与估时（粗略）：
 
 1. 资源发现与采样（1-2 天）
-   - 监听 DOM 初始资源与 mutation（script/link/img）。
+   - 监听 DOM 初始资源与 mutation（script/link）。
    - 用 Resource Timing 或 load 事件采集单次加载时延并缓存到内存队列。
 
 2. 统计聚合与节流写入（1 天）

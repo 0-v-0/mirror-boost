@@ -4,20 +4,17 @@ export async function attemptReplace(el: Element, newUrl: string, integrity?: st
     if (el.tagName.toLowerCase() === 'script') {
       const s = document.createElement('script')
       s.src = newUrl
-      if (integrationAvailable(integrity)) s.setAttribute('integrity', integrity!)
+      if (integrity) s.setAttribute('integrity', integrity)
       s.async = true
       replacement = s
     } else if (el.tagName.toLowerCase() === 'link') {
       const l = document.createElement('link')
-      l.rel = 'stylesheet'
+      // preserve rel where appropriate; caller should ensure rel attribute is correct (stylesheet or icon)
+      const rel = el.getAttribute('rel') || 'stylesheet'
+      l.rel = rel
       l.href = newUrl
-      if (integrationAvailable(integrity)) l.setAttribute('integrity', integrity!)
+      if (integrity) l.setAttribute('integrity', integrity)
       replacement = l
-    } else if (el.tagName.toLowerCase() === 'img') {
-      const i = document.createElement('img')
-      i.src = newUrl
-      if (integrationAvailable(integrity)) i.setAttribute('integrity', integrity!)
-      replacement = i
     } else {
       resolve(false)
       return
@@ -43,8 +40,4 @@ export async function attemptReplace(el: Element, newUrl: string, integrity?: st
     // insert but keep original until success
     el.parentElement?.insertBefore(replacement, el.nextSibling)
   })
-}
-
-function integrationAvailable(val?: string) {
-  return typeof val === 'string' && val.length > 0
 }
