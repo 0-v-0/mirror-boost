@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<title>替换流程测试页面</title>
+	<!-- 初始引用：模拟本地慢资源（在本地通过 http://localhost:8000/host1/remedy-slow.css 提供） -->
+	<!-- 带 integrity 属性以便扩展只在有 integrity 时尝试替换 -->
+	<link rel="stylesheet" href="http://localhost:8000/host1/remedy-slow.css" integrity="sha256-Dw1XyODgJ9BsZZHV8/XIpkI3Bl+hcUxKsd8/JPh7zeU=" crossorigin="anonymous">
+	<!-- 预期替换目标（示例，扩展替换后应变为此 CDN 链接）： -->
+	<!-- https://cdn.jsdelivr.net/npm/cssremedy@0.1.0-beta.2/css/remedy.min.css -->
+</head>
+<body>
+	<h1>资源替换流程测试</h1>
+	<p>该页面用于测试扩展是否会将慢链接替换为快速 CDN。步骤：</p>
+	<ol>
+		<li>在本地启动一个静态服务器（根目录为仓库根或 test 目录），确保 <code>/host1/remedy-slow.css</code> 可通过 <code>http://localhost:8000/host1/remedy-slow.css</code> 访问。</li>
+		<li>打开扩展并启用替换逻辑（或在开发版本中注入替换脚本）。</li>
+		<li>页面加载后，扩展应根据统计/阈值规则替换为 jsDelivr 的 CDN 链接（如果满足条件）。</li>
+	</ol>
+
+	<script>
+		// 提示：此脚本仅用于页面内演示，不会执行真正的替换。
+		console.log('测试页面加载完毕');
+	</script>
+</body>
+</html>
