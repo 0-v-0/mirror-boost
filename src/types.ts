@@ -21,7 +21,7 @@ export type IntegrityMap = {
 }
 
 export type Config = {
-	latencyThresholdMs: number
+	thresholdMs: number
 	minSampleCount: number
 	enableLogging: boolean
 	writeBatchMs: number
@@ -33,6 +33,12 @@ export type SriElement = {
 	integrity?: string
 }
 
-declare namespace globalThis {
-	const DEFAULT: Config
+declare global {
+	let DEFAULT: {
+		settings: Config
+		mirrors: string[]
+	}
+	let local: chrome.storage.StorageArea | undefined
+	function chromeGet<T = any>(key: string): Promise<T | undefined>
+	function chromeSet(obj: Record<string, any>): Promise<void>
 }

@@ -2,16 +2,6 @@ import 'uno.css'
 import { error, success } from '@cydon/ui/Message'
 import '@cydon/ui/src/c-message.css'
 
-const DEFAULT = {
-	settings: {
-		thresholdMs: 300,
-		minSampleCount: 3,
-		enableLogging: false,
-		writeBatchMs: 30_000,
-	},
-	mirrors: [],
-}
-
 function qs(id) { return document.getElementById(id) }
 
 async function load() {
@@ -44,19 +34,12 @@ async function save() {
 		mirrors,
 	}
 
-	await new Promise<void>((resolve) => {
-		if (!chrome?.storage?.local) return resolve()
-		chrome.storage.local.set(payload, () => resolve())
-	})
-
+	await chromeSet(payload)
 	success('已保存')
 }
 
 async function resetDefaults() {
-	await new Promise<void>((res) => {
-		if (!chrome?.storage?.local) return res()
-		chrome.storage.local.set(DEFAULT, () => res())
-	})
+	await chromeSet(DEFAULT)
 	await load()
 	success('已重置为默认')
 }

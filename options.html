@@ -7,8 +7,7 @@
 </head>
 <body>
 	<h1>MirrorBoost 配置</h1>
-
-	<section class="p-4">
+	<mb-options class="block p-4">
 		<h2>基本阈值</h2>
 		<div class="w-fit">
 			<label class="label">延迟阈值 (ms)：
@@ -18,7 +17,7 @@
 		</div>
 
 		<h2 class="mt-4">镜像列表（每行一个镜像 URL 模板）</h2>
-		<textarea class="input input-bordered w-full font-mono" id="mirrors"></textarea>
+		<textarea class="input input-bordered font-mono" id="mirrors" style="width: -webkit-fill-available;"></textarea>
 
 		<div class="mt-3">
 			<button id="saveBtn" class="btn">保存</button>
@@ -27,8 +26,9 @@
 			<button id="importBtn" class="btn">导入</button>
 			<input id="importInput" type="file" accept="application/json" hidden>
 		</div>
-	</section>
+	</mb-options>
 
+	<script src="config.js"></script>
 	<script type="module" src="src/options.ts"></script>
 </body>
 </html>

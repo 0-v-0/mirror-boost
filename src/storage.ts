@@ -1,23 +1,5 @@
 type KV = Record<string, any>
 
-const local = chrome.storage?.local
-
-export function chromeGet<T = any>(key: string): Promise<T | undefined> {
-	return new Promise((res) => {
-		if (!local) return res(undefined)
-		local.get(key, (items) => {
-			res((items as any)[key])
-		})
-	})
-}
-
-export function chromeSet(obj: Record<string, any>): Promise<void> {
-	return new Promise((res) => {
-		if (!local) return res()
-		local.set(obj, () => res())
-	})
-}
-
 export class KVStorage {
 	private mem: KV = {}
 
