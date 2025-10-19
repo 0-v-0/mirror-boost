@@ -21,10 +21,7 @@
     "permissions": [
         "declarativeNetRequestWithHostAccess",
         "scripting",
-        "storage",
-        "tabs",
-        "unlimitedStorage",
-        "webNavigation"
+        "storage"
     ],
     "host_permissions": [
         "*://*/*"
@@ -37,7 +34,8 @@
             "js": [
                 "index.js"
             ],
-            "run_at": "document_end"
+            "all_frames": true,
+            "run_at": "document_start"
         }
     ],
     "manifest_version": 3

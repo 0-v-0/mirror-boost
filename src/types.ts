@@ -26,3 +26,13 @@ export type Config = {
 	enableLogging: boolean
 	writeBatchMs: number
 }
+
+export type SriElement = {
+	el: HTMLElement
+	url: string
+	integrity?: string
+}
+
+declare namespace globalThis {
+	const DEFAULT: Config
+}

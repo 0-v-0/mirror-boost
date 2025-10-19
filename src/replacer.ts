@@ -1,17 +1,22 @@
 export async function attemptReplace(el: Element, newUrl: string, integrity?: string) {
 	return new Promise((res) => {
-		let newEl: Element | null = null
+		let newEl: Element
 		if (el.tagName.toLowerCase() === 'script') {
 			const s = document.createElement('script')
 			s.src = newUrl
-			if (integrity) s.integrity = integrity
+			if (integrity) {
+				s.integrity = integrity
+				s.crossOrigin = 'anonymous'
+			}
 			newEl = s
 		} else if (el.tagName.toLowerCase() === 'link') {
 			const l = document.createElement('link')
-			// preserve rel where appropriate; caller should ensure rel attribute is correct (stylesheet or icon)
-			l.rel = (el as HTMLLinkElement).rel || 'stylesheet'
+			l.rel = (el as HTMLLinkElement).rel
 			l.href = newUrl
-			if (integrity) l.integrity = integrity
+			if (integrity) {
+				l.integrity = integrity
+				l.crossOrigin = 'anonymous'
+			}
 			newEl = l
 		} else {
 			res(false)
@@ -19,23 +24,19 @@ export async function attemptReplace(el: Element, newUrl: string, integrity?: st
 		}
 
 		const onSuccess = () => {
-			newEl?.removeEventListener('load', onSuccess)
-			newEl?.removeEventListener('error', onError)
-			// swap
-			el.replaceWith(newEl!)
+			newEl.removeEventListener('load', onSuccess)
+			newEl.removeEventListener('error', onError)
 			res(true)
 		}
 		const onError = () => {
-			newEl?.removeEventListener('load', onSuccess)
-			newEl?.removeEventListener('error', onError)
-			// do not replace
+			newEl.removeEventListener('load', onSuccess)
+			newEl.removeEventListener('error', onError)
+			newEl.replaceWith(el)
 			res(false)
 		}
 
 		newEl.addEventListener('load', onSuccess)
 		newEl.addEventListener('error', onError)
-
-		// insert but keep original until success
-		el.parentElement?.insertBefore(newEl, el.nextSibling)
+		el.replaceWith(newEl)
 	})
 }

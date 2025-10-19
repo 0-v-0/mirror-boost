@@ -10,7 +10,7 @@ function integrityKey(val: string) {
 }
 
 export class Aggregator {
-	constructor(private cfg: Config) {}
+	constructor(private cfg: Config) { }
 
 	async aggregate(samples: Sample[]) {
 		if (!samples.length) return
@@ -21,30 +21,28 @@ export class Aggregator {
 			byHost[s.host].push(s)
 		}
 
-		const writes: Array<{ key: string; value: any }> = []
-
-		for (const host of Object.keys(byHost)) {
+		const writes: { key: string; value: any }[] = []
+		for (const host in byHost) {
 			const key = hostKey(host)
 			const existing: Stats | undefined = await storage.get(key)
 			const group = byHost[host]
 			const sum = group.reduce((a, b) => a + b.durationMs, 0)
 			const avg = sum / group.length
-
 			const merged: Stats = existing
 				? {
-						key,
-						samples: existing.samples + group.length,
-						avgMs: (existing.avgMs * existing.samples + sum) / (existing.samples + group.length),
-						firstAt: existing.firstAt,
-						lastAt: new Date().toISOString(),
-					}
+					key,
+					samples: existing.samples + group.length,
+					avgMs: (existing.avgMs * existing.samples + sum) / (existing.samples + group.length),
+					firstAt: existing.firstAt,
+					lastAt: new Date().toISOString(),
+				}
 				: {
-						key,
-						samples: group.length,
-						avgMs: avg,
-						firstAt: new Date().toISOString(),
-						lastAt: new Date().toISOString(),
-					}
+					key,
+					samples: group.length,
+					avgMs: avg,
+					firstAt: new Date().toISOString(),
+					lastAt: new Date().toISOString(),
+				}
 
 			// honor minSampleCount: if total samples are below threshold, still record but optionally skip heavy actions elsewhere
 			const min = this.cfg.minSampleCount || 3
@@ -58,9 +56,11 @@ export class Aggregator {
 			if (!s.integrity) continue
 			const ik = integrityKey(s.integrity)
 			const ex: IntegrityMap | undefined = await storage.get(ik)
-			const merged: IntegrityMap = ex
-				? { key: ik, urls: Array.from(new Set([...ex.urls, s.url])), lastSeenAt: new Date().toISOString() }
-				: { key: ik, urls: [s.url], lastSeenAt: new Date().toISOString() }
+			const merged: IntegrityMap = {
+				key: ik,
+				urls: ex ? [...new Set([...ex.urls, s.url])] : [s.url],
+				lastSeenAt: new Date().toISOString()
+			}
 			writes.push({ key: ik, value: merged })
 		}
 

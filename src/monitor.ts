@@ -1,4 +1,4 @@
-import { Sample, Config } from './types'
+import { Sample, Config, SriElement } from './types'
 
 export class Monitor {
 	private samples: Sample[] = []
@@ -9,7 +9,7 @@ export class Monitor {
 		if (this.cfg.enableLogging) console.debug('[Monitor] sample', s)
 	}
 
-	drain(): Sample[] {
+	drain() {
 		const out = this.samples.slice()
 		this.samples.length = 0
 		return out
@@ -17,7 +17,7 @@ export class Monitor {
 }
 
 export function collectSriLinks() {
-	const out: { el: HTMLElement; url: string; integrity?: string }[] = []
+	const out: SriElement[] = []
 	for (const el of (document.querySelectorAll('script[src][integrity]') as
 		NodeListOf<HTMLScriptElement>)) {
 		out.push({ el, url: el.src, integrity: el.integrity })

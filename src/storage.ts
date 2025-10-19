@@ -1,24 +1,24 @@
 type KV = Record<string, any>
 
-const local = globalThis.chrome?.storage?.local
+const local = chrome.storage?.local
 
-function chromeGet<T = any>(key: string): Promise<T | undefined> {
-	return new Promise((resolve) => {
-		if (!local) return resolve(undefined)
+export function chromeGet<T = any>(key: string): Promise<T | undefined> {
+	return new Promise((res) => {
+		if (!local) return res(undefined)
 		local.get(key, (items) => {
-			resolve((items as any)[key])
+			res((items as any)[key])
 		})
 	})
 }
 
-function chromeSet(obj: Record<string, any>): Promise<void> {
-	return new Promise((resolve) => {
-		if (!local) return resolve()
-		local.set(obj, () => resolve())
+export function chromeSet(obj: Record<string, any>): Promise<void> {
+	return new Promise((res) => {
+		if (!local) return res()
+		local.set(obj, () => res())
 	})
 }
 
-export class StorageWrapper {
+export class KVStorage {
 	private mem: KV = {}
 
 	async get<T = any>(key: string): Promise<T | undefined> {
@@ -28,7 +28,7 @@ export class StorageWrapper {
 		return this.mem[key]
 	}
 
-	async set(key: string, value: any): Promise<void> {
+	async set(key: string, value: any) {
 		if (local) {
 			return await chromeSet({ [key]: value })
 		}
@@ -36,15 +36,14 @@ export class StorageWrapper {
 	}
 
 	// simple batch writer used by aggregator
-	async writeBatch(items: Array<{ key: string; value: any }>): Promise<void> {
+	async writeBatch(items: Array<{ key: string; value: any }>) {
 		if (local) {
 			const payload: KV = {}
 			for (const it of items) payload[it.key] = it.value
 			await chromeSet(payload)
-			return
 		}
 		for (const it of items) this.mem[it.key] = it.value
 	}
 }
 
-export const storage = new StorageWrapper()
+export const storage = new KVStorage()

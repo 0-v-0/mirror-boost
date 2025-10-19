@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import { createServer } from 'http'
 import { existsSync, statSync, createReadStream } from 'fs'
-import { resolve, join, extname } from 'path'
+import { dirname, resolve, join, extname } from 'path'
+import { fileURLToPath } from 'url'
 
 function parseArg(name, fallback) {
 	const idx = process.argv.findIndex(a => a === `--${name}`)
@@ -11,8 +12,7 @@ function parseArg(name, fallback) {
 
 const port = parseInt(parseArg('port', process.env.PORT || '8000'), 10)
 const delay = parseInt(parseArg('delay', process.env.DELAY || '2000'), 10)
-
-const root = resolve(__dirname)
+const root = resolve(dirname(fileURLToPath(import.meta.url)))
 
 const mime = {
 	'.html': 'text/html; charset=utf-8',
@@ -57,6 +57,16 @@ const server = createServer((req, res) => {
 	const ext = extname(filePath).toLowerCase()
 	const type = mime[ext] || 'application/octet-stream'
 
+	if (ext === '.html') {
+		res.writeHead(200, { 'Content-Type': type })
+		const stream = createReadStream(filePath)
+		stream.pipe(res)
+		stream.on('error', () => {
+			res.writeHead(500)
+			res.end('Server error')
+		})
+		return
+	}
 	// introduce artificial delay
 	setTimeout(() => {
 		res.writeHead(200, { 'Content-Type': type })

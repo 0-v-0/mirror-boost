@@ -4,10 +4,10 @@ import '@cydon/ui/src/c-message.css'
 
 const DEFAULT = {
 	settings: {
-		latencyThresholdMs: 300,
+		thresholdMs: 300,
 		minSampleCount: 3,
 		enableLogging: false,
-		writeBatchMs: 30000,
+		writeBatchMs: 30_000,
 	},
 	mirrors: [],
 }
@@ -15,28 +15,28 @@ const DEFAULT = {
 function qs(id) { return document.getElementById(id) }
 
 async function load() {
-	const data = await new Promise((resolve) => {
-		if (!chrome?.storage?.local) return resolve({})
-		chrome.storage.local.get(['settings', 'mirrors'], (items) => resolve(items || {}))
+	const data = await new Promise((res) => {
+		if (!chrome?.storage?.local) return res({})
+		chrome.storage.local.get(['settings', 'mirrors'], (items) => res(items || {}))
 	})
 
 	const settings = data.settings || DEFAULT.settings
 	const mirrors = Array.isArray(data.mirrors) ? data.mirrors : DEFAULT.mirrors
 
-	qs('thresholdMs').value = settings.latencyThresholdMs ?? DEFAULT.settings.latencyThresholdMs
+	qs('thresholdMs').value = settings.thresholdMs ?? DEFAULT.settings.thresholdMs
 	qs('minSampleCount').value = settings.minSampleCount ?? DEFAULT.settings.minSampleCount
 	qs('mirrors').value = mirrors.join('\n')
 }
 
 async function save() {
-	const threshold = Number(qs('thresholdMs').value) || DEFAULT.settings.latencyThresholdMs
+	const threshold = Number(qs('thresholdMs').value) || DEFAULT.settings.thresholdMs
 	const minSamples = Math.max(1, Math.floor(Number(qs('minSampleCount').value) || DEFAULT.settings.minSampleCount))
 	const mirrorsText = qs('mirrors').value.trim()
 	const mirrors = mirrorsText ? mirrorsText.split('\n').map(s => s.trim()).filter(Boolean) : []
 
 	const payload = {
 		settings: {
-			latencyThresholdMs: threshold,
+			thresholdMs: threshold,
 			minSampleCount: minSamples,
 			enableLogging: DEFAULT.settings.enableLogging,
 			writeBatchMs: DEFAULT.settings.writeBatchMs,
@@ -44,7 +44,7 @@ async function save() {
 		mirrors,
 	}
 
-	await new Promise((resolve) => {
+	await new Promise<void>((resolve) => {
 		if (!chrome?.storage?.local) return resolve()
 		chrome.storage.local.set(payload, () => resolve())
 	})
@@ -53,9 +53,9 @@ async function save() {
 }
 
 async function resetDefaults() {
-	await new Promise((resolve) => {
-		if (!chrome?.storage?.local) return resolve()
-		chrome.storage.local.set({ settings: DEFAULT.settings, mirrors: DEFAULT.mirrors }, () => resolve())
+	await new Promise<void>((res) => {
+		if (!chrome?.storage?.local) return res()
+		chrome.storage.local.set(DEFAULT, () => res())
 	})
 	await load()
 	success('已重置为默认')
@@ -66,7 +66,7 @@ function exportJson() {
 		v: 1,
 		data: {
 			settings: {
-				latencyThresholdMs: Number(qs('thresholdMs').value) || DEFAULT.settings.latencyThresholdMs,
+				thresholdMs: Number(qs('thresholdMs').value) || DEFAULT.settings.thresholdMs,
 				minSampleCount: Number(qs('minSampleCount').value) || DEFAULT.settings.minSampleCount,
 			},
 			mirrors: qs('mirrors').value.split('\n').map(s => s.trim()).filter(Boolean),
@@ -91,7 +91,7 @@ function handleImportFile(file) {
 			const { settings, mirrors } = parsed.data
 			// basic validation
 			if (settings) {
-				qs('thresholdMs').value = Number(settings.latencyThresholdMs) || DEFAULT.settings.latencyThresholdMs
+				qs('thresholdMs').value = Number(settings.thresholdMs) || DEFAULT.settings.thresholdMs
 				qs('minSampleCount').value = Number(settings.minSampleCount) || DEFAULT.settings.minSampleCount
 			}
 			if (Array.isArray(mirrors)) {
