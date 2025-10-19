@@ -30,4 +30,4 @@ package-lock.json
 *.crx
 *.xpi
 ResourceOverride
-test/*.js
+test/globMatchToDNRRegexTest.js

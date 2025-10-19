@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Missing Resource 测试</title>
+  <!-- 引用一个不存在的脚本资源并带有 integrity以便触发替换/回退逻辑 -->
+  <script src="http://localhost:8000/not-exists.js" integrity="sha256-Dw1XyODgJ9BsZZHV8/XIpkI3Bl+hcUxKsd8/JPh7zeU=" crossorigin="anonymous"></script>
+</head>
+<body>
+  <h1>Missing Resource 测试页面</h1>
+  <p>该页面引用一个不存在的脚本（返回 404），带有 SRI；用于观察扩展在原资源加载失败时的处理（是否尝试替换或回退并记录失败）。</p>
+
+  <script>
+    console.log('missing-resource page loaded');
+    window.addEventListener('error', (e) => {
+      console.log('Window error event:', e.message || e)
+    })
+  </script>
+</body>
+</html>

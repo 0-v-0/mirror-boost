@@ -4,9 +4,9 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1">
 	<title>替换流程测试页面</title>
-	<!-- 初始引用：模拟本地慢资源（在本地通过 http://localhost:8000/host1/remedy-slow.css 提供） -->
+	<!-- 初始引用：模拟本地慢资源（在本地通过 http://localhost:8000/remedy.min.css 提供） -->
 	<!-- 带 integrity 属性以便扩展只在有 integrity 时尝试替换 -->
-	<link rel="stylesheet" href="http://localhost:8000/host1/remedy-slow.css" integrity="sha256-Dw1XyODgJ9BsZZHV8/XIpkI3Bl+hcUxKsd8/JPh7zeU=" crossorigin="anonymous">
+	<link rel="stylesheet" href="http://localhost:8000/remedy.min.css" integrity="sha256-Dw1XyODgJ9BsZZHV8/XIpkI3Bl+hcUxKsd8/JPh7zeU=" crossorigin="anonymous">
 	<!-- 预期替换目标（示例，扩展替换后应变为此 CDN 链接）： -->
 	<!-- https://cdn.jsdelivr.net/npm/cssremedy@0.1.0-beta.2/css/remedy.min.css -->
 </head>
@@ -14,9 +14,49 @@
 	<h1>资源替换流程测试</h1>
 	<p>该页面用于测试扩展是否会将慢链接替换为快速 CDN。步骤：</p>
 	<ol>
-		<li>在本地启动一个静态服务器（根目录为仓库根或 test 目录），确保 <code>/host1/remedy-slow.css</code> 可通过 <code>http://localhost:8000/host1/remedy-slow.css</code> 访问。</li>
-		<li>打开扩展并启用替换逻辑（或在开发版本中注入替换脚本）。</li>
-		<li>页面加载后，扩展应根据统计/阈值规则替换为 jsDelivr 的 CDN 链接（如果满足条件）。</li>
+		<li>
+			在一个终端中启动慢资源服务器（用于模拟慢 CSS），默认端口 8000、延迟 2000ms：
+			<pre><code>node ./test/slowServer.js --port 8000 --delay 2000</code></pre>
+			本页面中引用的慢资源： <code>http://localhost:8000/remedy.min.css</code>
+		</li>
+		<li>
+			在另一个终端中构建扩展/脚本（生成 <code>dist/mirror-boost.es.js</code>）：
+			<pre><code>pnpm build</code></pre>
+			如果你希望在控制台看到扩展日志，先把 <code>src/index.ts</code> 中的 <code>DEFAULT.enableLogging</code> 设置为 <code>true</code>，再执行构建。
+		</li>
+		<li>
+			在第三个终端中启动一个静态文件服务器以访问测试页面（或使用 Vite dev）：
+			<pre><code>pnpm dev
+-- 或 --
+npx serve . -l 8080</code></pre>
+			然后打开：<code>http://localhost:5173/test/replace-flow.html</code>（或 <code>http://localhost:8080/test/replace-flow.html</code>，取决于你使用的服务）。
+		</li>
+		<li>
+			注入构建产物（临时方法）：在页面打开后，在 DevTools Console 中执行：
+			<pre><code>const s=document.createElement('script');
+s.type='module';
+s.src='/dist/mirror-boost.es.js';
+document.head.appendChild(s);
+</code></pre>
+			或在调试时直接在页面头部添加：
+			<pre><code>&lt;script type="module" src="/dist/mirror-boost.es.js"&gt;&lt;/script&gt;</code></pre>
+		</li>
+		<li>
+			观察要点：
+			<ul>
+				<li>Network 面板：最初请求为 <code>http://localhost:8000/remedy.min.css</code>（响应延迟约为设定的 delay）。</li>
+				<li>当样本数达到阈值（默认最小样本数 3）且 avgMs &gt;= 默认阈值 300ms 时，扩展会尝试用候选 CDN URL 进行替换。替换后应能在 Network 中看到对 CDN 链接的请求（或在 DOM 中观察到新加入的 &lt;link&gt; 元素的 href 变化）。</li>
+				<li>若启用了日志（见步骤 2），Console 会输出替换尝试与结果；若替换失败或 SRI 校验失败，应回退到原资源。</li>
+			</ul>
+		</li>
+		<li>
+			排查提示：若没有发生替换，检查：
+			<ul>
+				<li>资源是否带有 <code>integrity</code>（扩展只在带 integrity 的资源上尝试替换）。</li>
+				<li>是否已注入或安装了构建产物，使替换逻辑运行。</li>
+				<li>storage 中是否已有足够的样本（可在扩展或控制台查看持久化的 stats/integrity_map）。</li>
+			</ul>
+		</li>
 	</ol>
 
 	<script>

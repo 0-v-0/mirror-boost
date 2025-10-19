@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<title>CDN 引用测试（不替换）</title>
+	<!-- 直接引用 CDN：预期效果为不会被替换（没有 integrity，或不满足替换条件） -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cssremedy@0.1.0-beta.2/css/remedy.min.css">
+</head>
+<body>
+	<h1>CDN 引用测试页面</h1>
+	<p>该页面直接引用 jsDelivr 上的 CSS，按设计不应被扩展替换（无 <code>integrity</code> 属性）。</p>
+
+	<script>
+		console.log('cdn-only test page loaded');
+	</script>
+</body>
+</html>
