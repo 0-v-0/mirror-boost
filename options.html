@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>MirrorBoost - 配置</title>
+</head>
+<body>
+	<h1>MirrorBoost 配置</h1>
+
+	<section class="p-4">
+		<h2>基本阈值</h2>
+		<div>
+			<label class="label">延迟阈值 (ms)：
+				<input id="thresholdMs" class="input input-bordered input-sm input-primary" type="number" min="0" /></label>
+		</div>
+		<div class="mt-2">
+			<label class="label">最小样本数：
+				<input id="minSampleCount" class="input input-bordered input-sm input-secondary" type="number" min="1" /></label>
+		</div>
+
+		<h2 class="mt-4">镜像列表（每行一个镜像 URL 模板）</h2>
+		<textarea class="input input-bordered w-full font-mono" id="mirrors"></textarea>
+
+		<div class="mt-3">
+			<button id="saveBtn" class="btn">保存</button>
+			<button id="resetBtn" class="btn">重置默认</button>
+			<button id="exportBtn" class="btn">导出</button>
+			<button id="importBtn" class="btn">导入</button>
+			<input id="importInput" type="file" accept="application/json" hidden>
+		</div>
+	</section>
+
+	<script type="module" src="src/options.ts"></script>
+</body>
+</html>

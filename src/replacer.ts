@@ -1,43 +1,41 @@
-export async function attemptReplace(el: Element, newUrl: string, integrity?: string): Promise<boolean> {
-	return new Promise((resolve) => {
-		let replacement: Element | null = null
+export async function attemptReplace(el: Element, newUrl: string, integrity?: string) {
+	return new Promise((res) => {
+		let newEl: Element | null = null
 		if (el.tagName.toLowerCase() === 'script') {
 			const s = document.createElement('script')
 			s.src = newUrl
-			if (integrity) s.setAttribute('integrity', integrity)
-			s.async = true
-			replacement = s
+			if (integrity) s.integrity = integrity
+			newEl = s
 		} else if (el.tagName.toLowerCase() === 'link') {
 			const l = document.createElement('link')
 			// preserve rel where appropriate; caller should ensure rel attribute is correct (stylesheet or icon)
-			const rel = el.getAttribute('rel') || 'stylesheet'
-			l.rel = rel
+			l.rel = (el as HTMLLinkElement).rel || 'stylesheet'
 			l.href = newUrl
-			if (integrity) l.setAttribute('integrity', integrity)
-			replacement = l
+			if (integrity) l.integrity = integrity
+			newEl = l
 		} else {
-			resolve(false)
+			res(false)
 			return
 		}
 
 		const onSuccess = () => {
-			replacement?.removeEventListener('load', onSuccess)
-			replacement?.removeEventListener('error', onError)
+			newEl?.removeEventListener('load', onSuccess)
+			newEl?.removeEventListener('error', onError)
 			// swap
-			el.replaceWith(replacement!)
-			resolve(true)
+			el.replaceWith(newEl!)
+			res(true)
 		}
 		const onError = () => {
-			replacement?.removeEventListener('load', onSuccess)
-			replacement?.removeEventListener('error', onError)
+			newEl?.removeEventListener('load', onSuccess)
+			newEl?.removeEventListener('error', onError)
 			// do not replace
-			resolve(false)
+			res(false)
 		}
 
-		replacement.addEventListener('load', onSuccess)
-		replacement.addEventListener('error', onError)
+		newEl.addEventListener('load', onSuccess)
+		newEl.addEventListener('error', onError)
 
 		// insert but keep original until success
-		el.parentElement?.insertBefore(replacement, el.nextSibling)
+		el.parentElement?.insertBefore(newEl, el.nextSibling)
 	})
 }

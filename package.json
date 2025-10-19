@@ -1,23 +1,30 @@
 {
-  "name": "mirror-boost",
-  "private": true,
-  "version": "0.0.1",
-  "description": "An extension to optimize the loading speed of styles, scripts, and icons by replacing slow-loading resources with those from mirror servers.",
-  "main": "index.js",
-  "scripts": {
-    "build": "vite build",
-    "dev": "vite",
-    "typecheck": "tsc --noEmit",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-	"daisyui": "^5.3.7",
-    "typescript": "^5.9.3",
-    "vite": "^7.1.10",
-    "@types/node": "^24.8.1",
-    "@types/chrome": "^0.1.24"
-  },
-  "type": "module"
+	"name": "mirror-boost",
+	"private": true,
+	"version": "0.0.1",
+	"description": "An extension to optimize the loading speed of styles, scripts, and icons by replacing slow-loading resources with those from mirror servers.",
+	"main": "index.js",
+	"scripts": {
+		"build": "vite build",
+		"dev": "vite",
+		"typecheck": "tsc --noEmit",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"@cydon/ui": "link:e:\\cydon\\packages\\ui",
+		"cydon": "link:e:\\cydon\\packages\\cydon"
+	},
+	"devDependencies": {
+		"daisyui": "^5.3.7",
+		"typescript": "^5.9.3",
+		"unocss": "^66.5.4",
+		"unocss-preset-daisyui-next": "^0.1.2",
+		"vite": "^7.1.10",
+		"@types/node": "^24.8.1",
+		"@unocss/transformer-directives": "^66.5.4",
+		"@types/chrome": "^0.1.24"
+	},
+	"type": "module"
 }

@@ -8,3 +8,5 @@
 根据任务文档，使用README.md中的技术栈实现一个MVP，将ts代码放在src目录下，现有的ResourceOverride目录中的代码过于古老，仅供参考
 ---
 安装npm包`@types/chrome`，避免ts文件中出现`(globalThis as any).chrome`类似写法
+---
+根据任务文档，使用README.md中的技术栈，创建配置页面`src/options.html`，支持配置阈值、最小样本数、镜像列表

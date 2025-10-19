@@ -1,7 +1,8 @@
-import { Monitor, detectResourcesWithIntegrity } from './monitor'
+import { Monitor, collectSriLinks } from './monitor'
 import { Aggregator } from './aggregator'
 import { attemptReplace } from './replacer'
 import { Config } from './types'
+import { storage } from './storage'
 
 const DEFAULT: Config = {
 	latencyThresholdMs: 300,
@@ -15,9 +16,9 @@ const aggregator = new Aggregator(DEFAULT)
 
 function observeResourceTiming() {
 	// collect existing resources with integrity and attach load events
-	const resources = detectResourcesWithIntegrity()
+	const resources = collectSriLinks()
 	for (const r of resources) {
-		const el = r.el as HTMLElement
+		const el = r.el
 		const start = performance.now()
 		const onLoad = () => {
 			const duration = performance.now() - start
@@ -38,13 +39,13 @@ setInterval(async () => {
 async function tryReplacementCycle() {
 	// load stats and integrity_map keys from storage
 	// Minimal: scan detected resources and attempt replace with same integrity urls from different hosts with lower avg
-	const resources = detectResourcesWithIntegrity()
+	const resources = collectSriLinks()
 	for (const r of resources) {
 		if (!r.integrity) continue
 		// find candidate urls from integrity map (read from storage)
 		try {
 			const mapKey = `integrity:${r.integrity}`
-			const map = await (await import('./storage')).storage.get(mapKey)
+			const map = await storage.get(mapKey)
 			if (!map || !map.urls) continue
 			// pick first url on a different host
 			const candidates: string[] = map.urls.filter((u: string) => new URL(u).host !== new URL(r.url).host)

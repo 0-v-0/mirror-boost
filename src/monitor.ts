@@ -2,7 +2,7 @@ import { Sample, Config } from './types'
 
 export class Monitor {
 	private samples: Sample[] = []
-	constructor(private cfg: Config) {}
+	constructor(private cfg: Config) { }
 
 	addSample(s: Sample) {
 		this.samples.push(s)
@@ -16,26 +16,15 @@ export class Monitor {
 	}
 }
 
-export function detectResourcesWithIntegrity(): Array<{ el: Element; url: string; integrity?: string }> {
-	const out: Array<{ el: Element; url: string; integrity?: string }> = []
-	const scripts = Array.from(document.querySelectorAll('script[src][integrity]'))
-	for (const s of scripts) {
-		const el = s as HTMLScriptElement
-		const integrity = el.getAttribute('integrity') || undefined
-		out.push({ el, url: el.src, integrity })
+export function collectSriLinks() {
+	const out: { el: HTMLElement; url: string; integrity?: string }[] = []
+	for (const el of (document.querySelectorAll('script[src][integrity]') as
+		NodeListOf<HTMLScriptElement>)) {
+		out.push({ el, url: el.src, integrity: el.integrity })
 	}
-	const links = Array.from(document.querySelectorAll('link[rel=stylesheet][href][integrity]'))
-	for (const l of links) {
-		const el = l as HTMLLinkElement
-		const integrity = el.getAttribute('integrity') || undefined
-		out.push({ el, url: el.href, integrity })
-	}
-	// favicon / icon links
-	const icons = Array.from(document.querySelectorAll('link[rel~="icon"][href][integrity]'))
-	for (const it of icons) {
-		const el = it as HTMLLinkElement
-		const integrity = el.getAttribute('integrity') || undefined
-		out.push({ el, url: el.href, integrity })
+	for (const el of (document.querySelectorAll('link[href][integrity]') as
+		NodeListOf<HTMLLinkElement>)) {
+		out.push({ el, url: el.href, integrity: el.integrity })
 	}
 	return out
 }

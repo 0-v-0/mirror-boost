@@ -1,8 +1,6 @@
 import { defineConfig } from 'vite'
+import UnoCSS from 'unocss/vite'
 import path from 'path'
-import { fileURLToPath } from 'url'
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
 	build: {
@@ -11,17 +9,15 @@ export default defineConfig({
 			entry: path.resolve(__dirname, 'src/index.ts'),
 			name: 'mirrorBoost',
 			formats: ['es'],
-			fileName: (format) => `mirror-boost.${format}.js`,
+			fileName: (_, entry) => `${entry}.js`,
 		},
 		rollupOptions: {
-			// make sure to externalize deps that shouldn't be bundled
-			external: [],
+			input: {
+				options: path.resolve(__dirname, 'options.html'),
+				index: path.resolve(__dirname, 'src/index.ts'),
+			},
 		},
 		outDir: 'dist',
 	},
-	resolve: {
-		alias: {
-			'@': path.resolve(__dirname, 'src'),
-		},
-	},
+	plugins: [UnoCSS()],
 })
