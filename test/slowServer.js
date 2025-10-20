@@ -44,7 +44,7 @@ const server = createServer((req, res) => {
 		if (stat && stat.isDirectory()) {
 			filePath = join(filePath, 'index.html')
 		}
-	} catch (e) {
+	} catch {
 		// ignore
 	}
 

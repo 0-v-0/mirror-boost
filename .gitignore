@@ -31,3 +31,4 @@ package-lock.json
 *.xpi
 ResourceOverride
 test/globMatchToDNRRegexTest.js
+pnpm-lock.yaml

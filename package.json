@@ -14,18 +14,19 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
-		"@cydon/ui": "link:e:\\cydon\\packages\\ui",
-		"cydon": "link:e:\\cydon\\packages\\cydon"
+		"@cydon/ui": "link:..\\cydon\\packages\\ui",
+		"cydon": "link:..\\cydon\\packages\\cydon",
+		"idb": "^8.0.3"
 	},
 	"devDependencies": {
+		"@types/chrome": "^0.1.24",
+		"@types/node": "^24.8.1",
+		"@unocss/transformer-directives": "^66.5.4",
 		"daisyui": "^5.3.7",
 		"typescript": "^5.9.3",
 		"unocss": "^66.5.4",
 		"unocss-preset-daisyui-next": "^0.1.2",
-		"vite": "^7.1.10",
-		"@types/node": "^24.8.1",
-		"@unocss/transformer-directives": "^66.5.4",
-		"@types/chrome": "^0.1.24"
+		"vite": "^7.1.10"
 	},
 	"type": "module"
 }

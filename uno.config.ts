@@ -19,7 +19,7 @@ export default defineConfig({
 			base: false,
 			themes: false,
 			utils: true,
-			variablePrefix: 'u-',
+			//variablePrefix: 'u-',
 		})
 	],
 	transformers: [

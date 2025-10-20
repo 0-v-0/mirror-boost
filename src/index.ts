@@ -94,10 +94,13 @@ chromeGet<Config>('settings').then((cfg = DEFAULT.settings) => {
 				const candidates: string[] = map.urls.filter((u: string) => new URL(u).host !== host)
 				if (!candidates.length) continue
 				const chosen = candidates[0]
-				const ok = await attemptReplace(r.el, chosen, r.integrity)
-				if (cfg.enableLogging)
-					console.log(`[mb] ${ok ? 'replaced' : 'failed to replace'
-						} ${r.url} -> ${chosen}`)
+				attemptReplace(r.el, chosen, r.integrity).then(() => {
+					if (cfg.enableLogging)
+						console.log(`[mb] replaced ${r.url} -> ${chosen}`)
+				}, (e) => {
+					if (cfg.enableLogging)
+						console.error(`[mb] failed to replace ${r.url} -> ${chosen}`, e)
+				})
 			} catch (e) {
 				if (cfg.enableLogging) console.error(e)
 			}

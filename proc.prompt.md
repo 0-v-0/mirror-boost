@@ -10,3 +10,7 @@
 安装npm包`@types/chrome`，避免ts文件中出现`(globalThis as any).chrome`类似写法
 ---
 根据任务文档，使用README.md中的技术栈，创建配置页面`src/options.html`，支持配置阈值、最小样本数、镜像列表
+---
+目录结构已经变化，根据当前工作区更新任务文档中的文件名
+---
+给types.ts中所有导出的类型添加文档注释

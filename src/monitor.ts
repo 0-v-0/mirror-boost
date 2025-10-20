@@ -20,11 +20,15 @@ export function collectSriLinks() {
 	const out: SriElement[] = []
 	for (const el of (document.querySelectorAll('script[src][integrity]') as
 		NodeListOf<HTMLScriptElement>)) {
-		out.push({ el, url: el.src, integrity: el.integrity })
+		const integrity = el.integrity
+		if (integrity)
+			out.push({ el, url: el.src, integrity })
 	}
 	for (const el of (document.querySelectorAll('link[href][integrity]') as
 		NodeListOf<HTMLLinkElement>)) {
-		out.push({ el, url: el.href, integrity: el.integrity })
+		const integrity = el.integrity
+		if (integrity)
+			out.push({ el, url: el.href, integrity })
 	}
 	return out
 }
