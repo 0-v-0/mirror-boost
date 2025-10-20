@@ -3,13 +3,13 @@
     "version": "0.1",
     "description": "An extension to optimize the loading speed of styles, scripts, and icons by replacing slow-loading resources with those from mirror servers.",
     "icons": {
-        "16": "icons/icon.svg",
-        "48": "icons/icon.svg",
-        "128": "icons/icon.svg"
+        "16": "icons/icon16.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
     },
     "action": {
         "default_icon": {
-            "16": "icons/icon.svg"
+            "16": "icons/icon16.png"
         }
     },
     "options_ui": {
