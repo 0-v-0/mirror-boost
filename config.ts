@@ -4,8 +4,9 @@ DEFAULT = {
 		minSampleCount: 3,
 		enableLogging: false,
 		writeBatchMs: 30000,
+		ttlMs: 7 * 24 * 60 * 60 * 1000, // 7 days
 	},
-	mirrors: [],
+	rules: '',
 };
 
 local = chrome.storage?.local

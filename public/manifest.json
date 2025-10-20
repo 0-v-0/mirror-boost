@@ -1,43 +1,53 @@
 {
-    "name": "Mirror Boost",
-    "version": "0.1",
-    "description": "An extension to optimize the loading speed of styles, scripts, and icons by replacing slow-loading resources with those from mirror servers.",
-    "icons": {
-        "16": "icons/icon16.png",
-        "48": "icons/icon48.png",
-        "128": "icons/icon128.png"
-    },
-    "action": {
-        "default_icon": {
-            "16": "icons/icon16.png"
-        }
-    },
-    "options_ui": {
-        "page": "options.html"
-    },
-    "background": {
-        "service_worker": "background.js"
-    },
-    "permissions": [
-        "declarativeNetRequestWithHostAccess",
-        "scripting",
-        "storage"
-    ],
-    "host_permissions": [
-        "*://*/*"
-    ],
-    "content_scripts": [
-        {
-            "matches": [
-                "*://*/*"
-            ],
-            "js": [
-                "config.js",
-                "index.js"
-            ],
-            "all_frames": true,
-            "run_at": "document_start"
-        }
-    ],
-    "manifest_version": 3
+	"name": "Mirror Boost",
+	"version": "0.1",
+	"description": "An extension to optimize the loading speed of styles, scripts, and icons by replacing slow-loading resources with those from mirror servers.",
+	"icons": {
+		"16": "icons/icon16.png",
+		"48": "icons/icon48.png",
+		"128": "icons/icon128.png"
+	},
+	"action": {
+		"default_icon": {
+			"16": "icons/icon16.png"
+		}
+	},
+	"options_ui": {
+		"page": "options.html"
+	},
+	"background": {
+		"service_worker": "background.js",
+		"type": "module"
+	},
+	"permissions": [
+		"declarativeNetRequestWithHostAccess",
+		"scripting",
+		"storage"
+	],
+	"host_permissions": [
+		"*://*/*"
+	],
+	"content_scripts": [
+		{
+			"matches": [
+				"*://*/*"
+			],
+			"js": [
+				"config.js",
+				"index.js"
+			],
+			"all_frames": true,
+			"run_at": "document_start"
+		},
+		{
+			"matches": [
+				"*://*/*"
+			],
+			"js": [
+				"config.js",
+				"idle.js"
+			]
+		}
+	],
+	"manifest_version": 3
 }

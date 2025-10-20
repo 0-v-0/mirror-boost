@@ -4,15 +4,23 @@ import { error, success } from '@cydon/ui/Message'
 import '@cydon/ui/src/c-message.css'
 
 type Options = typeof DEFAULT | undefined
-function load() {
-	return new Promise<Options>((res) => {
-		if (!chrome?.storage?.local) return res(void 0)
-		chrome.storage.local.get(['settings', 'mirrors'], (items) => res(items as any))
-	})
-}
 
-function parseUrls(text: string) {
-	return text.trim().split('\n').map(s => s.trim()).filter(Boolean)
+const sendMsg = (msg: any) => new Promise<any>((res, rej) => {
+	chrome.runtime.sendMessage(msg, (resp) => {
+		const err = chrome.runtime.lastError || resp?.error;
+		if (err) return rej(err);
+		res(resp);
+	});
+});
+function load() {
+	const cfg = new Promise<Options>((res) => {
+		if (!chrome?.storage?.local) return res(void 0)
+		chrome.storage.local.get(['settings'], async (items) => {
+			const rules: chrome.declarativeNetRequest.Rule[] = await sendMsg({ message: 'get_rules' }) || []
+			res({ ...items, rules: JSON.stringify(rules, null, 2) } as any)
+		})
+	})
+	return cfg
 }
 
 class MbOptions extends CydonElement {
@@ -22,7 +30,7 @@ class MbOptions extends CydonElement {
 	minSampleCount!: number
 	enableLogging!: boolean
 	writeBatchMs!: number
-	mirrors!: string
+	rules!: string
 
 	async connectedCallback() {
 		await this.load()
@@ -39,7 +47,7 @@ class MbOptions extends CydonElement {
 			this.minSampleCount = cfg.settings?.minSampleCount ?? DEFAULT.settings.minSampleCount
 			this.enableLogging = cfg.settings?.enableLogging ?? DEFAULT.settings.enableLogging
 			this.writeBatchMs = cfg.settings?.writeBatchMs ?? DEFAULT.settings.writeBatchMs
-			this.mirrors = Array.isArray(cfg.mirrors) ? cfg.mirrors.join('\n') : DEFAULT.mirrors.join('\n')
+			this.rules = cfg.rules
 		}
 	}
 
@@ -51,7 +59,7 @@ class MbOptions extends CydonElement {
 				enableLogging: this.enableLogging,
 				writeBatchMs: this.writeBatchMs,
 			},
-			mirrors: parseUrls(this.mirrors),
+			rules: this.rules,
 		}
 		await chromeSet(payload)
 	}
@@ -62,6 +70,21 @@ class MbOptions extends CydonElement {
 		success('已重置为默认')
 	}
 
+	async clearData() {
+		// TODO
+		success('已清空所有数据')
+	}
+
+	async clearRules() {
+		const rules: chrome.declarativeNetRequest.Rule[] = await sendMsg({ message: 'get_rules' }) || []
+		if (rules.length) {
+			await sendMsg({ message: 'update_rules', removeRuleIds: rules.map(r => r.id) })
+		}
+		this.rules = ''
+		await this.save()
+		success('已清空所有规则')
+	}
+
 	exportJson() {
 		const obj = {
 			v: 1,
@@ -70,7 +93,7 @@ class MbOptions extends CydonElement {
 					thresholdMs: this.thresholdMs,
 					minSampleCount: this.minSampleCount,
 				},
-				mirrors: this.mirrors.split('\n').map(s => s.trim()).filter(Boolean),
+				rules: this.rules.split('\n').map(s => s.trim()).filter(Boolean),
 			}
 		}
 		const json = JSON.stringify(obj)
@@ -91,7 +114,7 @@ class MbOptions extends CydonElement {
 				if (!data) throw new Error('invalid format')
 				await this.load({
 					settings: data.settings,
-					mirrors: data.mirrors,
+					rules: data.rules,
 				})
 				await this.save()
 				success('导入并保存成功')

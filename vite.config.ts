@@ -16,6 +16,7 @@ export default defineConfig({
 				options: path.resolve(__dirname, 'options.html'),
 				background: path.resolve(__dirname, 'src/background.ts'),
 				config: path.resolve(__dirname, 'config.ts'),
+				idle: path.resolve(__dirname, 'src/idle.ts'),
 				index: path.resolve(__dirname, 'src/index.ts'),
 			},
 		},

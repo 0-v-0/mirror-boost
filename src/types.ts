@@ -60,6 +60,8 @@ export type Config = {
 	enableLogging: boolean
 	/** Time window in milliseconds to batch writes to storage. */
 	writeBatchMs: number
+	/** Time-to-live for samples stored, in milliseconds. */
+	ttlMs: number
 }
 
 /**
@@ -82,8 +84,8 @@ declare global {
 	let DEFAULT: {
 		/** Current runtime settings. */
 		settings: Config
-		/** Ordered list of mirror base URLs to try when rewriting resources. */
-		mirrors: string[]
+		/** Rules array as JSON string. */
+		rules: string
 	}
 	/** Convenience reference to Chrome's local storage area (may be undefined in tests). */
 	let local: chrome.storage.StorageArea | undefined

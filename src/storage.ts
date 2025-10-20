@@ -1,4 +1,4 @@
-import { openDB, deleteDB, IDBPDatabase } from "idb"
+import { openDB, IDBPDatabase } from 'idb'
 
 type DBSchema = {
 	stats: { key: string; };
@@ -131,15 +131,6 @@ export class KVStorage {
 			console.error('[storage] writeBatchIntegrity error', e)
 			try { tx.abort() } catch { /* ignore */ }
 		}
-	}
-
-	// helper to destroy DB in tests/debug
-	async _deleteDB() {
-		const db = await this.dbPromise
-		const name = db.name
-		db.close()
-		await deleteDB(name)
-		this.dbPromise = this.initDB()
 	}
 }
 

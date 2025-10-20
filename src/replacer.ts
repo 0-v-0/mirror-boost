@@ -1,9 +1,12 @@
+import { sendMsg } from './util'
+
 export async function attemptReplace(el: HTMLLinkElement | HTMLScriptElement, newUrl: string, _integrity?: string) {
 	const tag = el.tagName.toLowerCase()
 	if (tag !== 'script' && tag !== 'link')
 		throw new Error('Element is not script or link')
 
-	const url = tag === 'script' ? (el as HTMLScriptElement).src : (el as HTMLLinkElement).href
+	const attr = tag === 'script' ? 'src' : 'href'
+	const url = (el as any)[attr] as string
 	if (!url)
 		throw new Error('Element has no src/href')
 
@@ -26,23 +29,13 @@ export async function attemptReplace(el: HTMLLinkElement | HTMLScriptElement, ne
 
 	// Some browsers require urlFilter to be a pattern; using urlFilter with full URL works in Chrome.
 	// Content scripts cannot call declarativeNetRequest directly, so proxy via background.
-	const sendUpdate = (ruleOrId: any) => new Promise<void>((res, rej) => {
-		chrome.runtime.sendMessage({ message: 'update_rules', rule: ruleOrId }, (resp) => {
-			const err = chrome.runtime.lastError || resp?.error
-			if (err) return rej(err)
-			res()
-		})
-	})
-
-	await sendUpdate(rule)
+	await sendMsg({ message: 'update_rules', rule })
 
 	// Now perform the DOM swap keeping original URL on element so that browser requests originalUrl
 	return new Promise<void>((res, rej) => {
 		const cleanup = () => {
 			el.removeEventListener('load', onLoad)
 			el.removeEventListener('error', onError)
-			// fire-and-forget removal via background message; ignore errors
-			sendUpdate(ruleId).catch(() => { /* ignore */ })
 		}
 
 		const onLoad = () => {
@@ -51,6 +44,8 @@ export async function attemptReplace(el: HTMLLinkElement | HTMLScriptElement, ne
 		}
 		const onError = (e: Event) => {
 			cleanup()
+			console.log('Error loading resource:', url);
+			//(el as any)[attr] = url // revert to original URL
 			rej((e as ErrorEvent).error)
 		}
 

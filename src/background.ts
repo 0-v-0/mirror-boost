@@ -1,6 +1,10 @@
+import { Aggregator } from './aggregator';
+import { storage } from './storage';
+import { Config } from './types';
+
 chrome.action.onClicked.addListener(function () {
 	// open or focus options page.
-	const optionsUrl = chrome.runtime.getURL("options.html");
+	const optionsUrl = chrome.runtime.getURL('options.html');
 	chrome.tabs.query({}, function (extensionTabs) {
 		for (let i = 0, len = extensionTabs.length; i < len; i++) {
 			if (optionsUrl === extensionTabs[i].url) {
@@ -12,34 +16,119 @@ chrome.action.onClicked.addListener(function () {
 	});
 });
 
-chrome.runtime.onMessage.addListener(function(request, _sender, sendResponse) {
-	if (request.message === "update_rules") {
-		const rule = request.rule;
-		const ruleId = typeof rule === 'number' ? rule : rule.ruleId;
+// Helper: simple match check against a rule's condition.urlFilter
+const matchesUrlFilter = (urlFilter: any, url: string) => {
+	if (!urlFilter) return false;
+	// Many rules use urlFilter as a substring or pattern. For safety,
+	// treat urlFilter as either an exact match or a substring.
+	if (typeof urlFilter === 'string') {
+		if (url.includes(urlFilter)) return true;
+	}
+	return false;
+}
+
+function chromeGet<T = any>(key: string): Promise<T | undefined> {
+	return new Promise((res) => {
+		if (!local) return res(undefined);
+		local.get(key, (items) => {
+			res((items as any)[key]);
+		});
+	});
+}
+
+chrome.runtime.onStartup.addListener(async () => {
+	const cfg = await chromeGet<chrome.declarativeNetRequest.Rule[]>('rules')
+	if (cfg?.length) {
+		chrome.declarativeNetRequest.updateDynamicRules({
+			addRules: cfg,
+			removeRuleIds: []
+		}, () => {
+			/* ignore */
+		});
+	}
+});
+
+chrome.runtime.onMessage.addListener(function (request, _sender, sendResponse) {
+	if (request.message === 'update_rules') {
+		const rule = request.addRule;
+		// If the request is to add a rule (object), check whether the new rule's
+		// redirect target would itself be matched by any existing dynamic rule.
+		if (rule?.action?.redirect?.url) {
+			const ruleId = rule.ruleId;
+			const newTarget: string = rule.action.redirect.url;
+			// Fetch existing dynamic rules to check for conflicts
+			chrome.declarativeNetRequest.getDynamicRules((existingRules = []) => {
+				const err = chrome.runtime.lastError;
+				if (err) {
+					// forward getDynamicRules error
+					sendResponse({ ruleId, error: err });
+					return;
+				}
+				const ids = request.removeRuleIds || [];
+				// Iterate existing rules and see if any would match newTarget
+				for (const r of existingRules) {
+					if (r.condition) {
+						if (r.condition.urlFilter === rule.condition.urlFilter) {
+							return;
+						}
+						if (matchesUrlFilter(r.condition.urlFilter, newTarget)) {
+							// Found an existing rule that would redirect the new target.
+							//sendResponse({ ruleId, error: { message: 'redirect_target_conflict', details: { existingRuleId: r.id, existingRule: r } } });
+							//return;
+							ids.push(r.id);
+						}
+					}
+				}
+				try {
+					chrome.declarativeNetRequest.updateDynamicRules({ addRules: [rule], removeRuleIds: ids }, () => {
+						sendResponse({ ruleId, error: chrome.runtime.lastError })
+					})
+				} catch (err) {
+					sendResponse({ ruleId, error: err })
+				}
+			})
+			// indicate we will call sendResponse asynchronously
+			return true;
+		}
+		const ruleIds = request.removeRuleIds;
+		// If it's a remove (number) or other operation, fall back to previous behavior
 		try {
-			chrome.declarativeNetRequest.updateDynamicRules(typeof rule === 'number' ? {
+			chrome.declarativeNetRequest.updateDynamicRules({
 				addRules: [],
-				removeRuleIds: [rule]
-			} : {
-				addRules: [rule],
-				removeRuleIds: []
+				removeRuleIds: ruleIds
 			}, () => {
-				// send response back to sender; include lastError if any
-				sendResponse({ ruleId, error: chrome.runtime.lastError })
+				sendResponse({ ruleIds, error: chrome.runtime.lastError })
 			})
 		} catch (err) {
-			// ensure we always respond so the message port doesn't close unexpectedly
-			sendResponse({ ruleId, error: err })
+			sendResponse({ ruleIds, error: err })
 		}
-		// return true to indicate we'll call sendResponse asynchronously
 		return true;
 	}
-	if (request.message === "get_rules") {
+	if (request.message === 'get_rules') {
 		chrome.declarativeNetRequest.getDynamicRules((rules) => {
 			sendResponse({ rules, error: chrome.runtime.lastError })
 		})
 		return true;
 	}
-	// sync handler: not handling other messages here
+	if (request.message === 'aggregate') {
+		const aggregator = new Aggregator(request.config)
+		aggregator.aggregate(request.samples);
+		sendResponse({});
+		return true;
+	}
+	if (request.message === 'clear_expired') {
+		const config = request.config;
+		const aggregator = new Aggregator(config)
+		aggregator.clearExpired(config.ttlMs).then(() => {
+			sendResponse({});
+		});
+		return true;
+	}
+	if (request.message === 'get_integrity') {
+		storage.getIntegrity(request.key).then((map) => {
+			sendResponse({ urls: map?.urls });
+		});
+		return true;
+	}
 	return false;
 });
