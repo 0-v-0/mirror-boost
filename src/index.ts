@@ -39,7 +39,7 @@ chromeGet<Config>('settings').then((cfg = DEFAULT.settings) => {
 			}
 		} catch (e) {
 			if (cfg.enableLogging)
-				console.warn('[index] resource timing failed', e)
+				console.warn('[mb] resource timing failed', e)
 		}
 
 		// For any resources not observed via Resource Timing API, attach load listeners as fallback
@@ -78,7 +78,7 @@ chromeGet<Config>('settings').then((cfg = DEFAULT.settings) => {
 		// load stats and integrity_map keys from storage
 		// Minimal: scan detected resources and attempt replace with same integrity urls from different hosts with lower avg
 		if (cfg.enableLogging && resources.length) {
-			console.log(`[index] found ${resources.length} sri-protected resources`)
+			console.log(`[mb] found ${resources.length} sri-protected resources`)
 		}
 		for (const r of resources) {
 			if (!r.integrity) continue
@@ -88,7 +88,7 @@ chromeGet<Config>('settings').then((cfg = DEFAULT.settings) => {
 				const map = await storage.get(mapKey)
 				if (!map?.urls) continue
 				if (cfg.enableLogging)
-					console.log(`[index] found ${map.urls.length} candidates for integrity ${r.integrity}`)
+					console.log(`[mb] found ${map.urls.length} candidates for integrity ${r.integrity}`)
 				const host = new URL(r.url).host
 				// pick first url on a different host
 				const candidates: string[] = map.urls.filter((u: string) => new URL(u).host !== host)
@@ -96,7 +96,7 @@ chromeGet<Config>('settings').then((cfg = DEFAULT.settings) => {
 				const chosen = candidates[0]
 				const ok = await attemptReplace(r.el, chosen, r.integrity)
 				if (cfg.enableLogging)
-					console.log(`[index] ${ok ? 'replaced' : 'failed to replace'
+					console.log(`[mb] ${ok ? 'replaced' : 'failed to replace'
 						} ${r.url} -> ${chosen}`)
 			} catch (e) {
 				if (cfg.enableLogging) console.error(e)

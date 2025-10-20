@@ -39,6 +39,6 @@ declare global {
 		mirrors: string[]
 	}
 	let local: chrome.storage.StorageArea | undefined
-	function chromeGet<T = any>(key: string): Promise<T | undefined>
-	function chromeSet(obj: Record<string, any>): Promise<void>
+	let chromeGet: <T = any>(key: string) => Promise<T | undefined>
+	let chromeSet: (obj: Record<string, any>) => Promise<void>
 }

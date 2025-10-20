@@ -20,12 +20,7 @@
 			本页面中引用的慢资源： <code>http://localhost:8000/remedy.min.css</code>
 		</li>
 		<li>
-			在另一个终端中构建扩展/脚本（生成 <code>dist/mirror-boost.es.js</code>）：
-			<pre><code>pnpm build</code></pre>
-			如果你希望在控制台看到扩展日志，先把 <code>src/index.ts</code> 中的 <code>DEFAULT.enableLogging</code> 设置为 <code>true</code>，再执行构建。
-		</li>
-		<li>
-			在第三个终端中启动一个静态文件服务器以访问测试页面（或使用 Vite dev）：
+			在另一个终端中启动一个静态文件服务器以访问测试页面（或使用 Vite dev）：
 			<pre><code>pnpm dev
 -- 或 --
 npx serve . -l 8080</code></pre>
@@ -35,11 +30,11 @@ npx serve . -l 8080</code></pre>
 			注入构建产物（临时方法）：在页面打开后，在 DevTools Console 中执行：
 			<pre><code>const s=document.createElement('script');
 s.type='module';
-s.src='/dist/mirror-boost.es.js';
+s.src='/dist/index.js';
 document.head.appendChild(s);
 </code></pre>
 			或在调试时直接在页面头部添加：
-			<pre><code>&lt;script type="module" src="/dist/mirror-boost.es.js"&gt;&lt;/script&gt;</code></pre>
+			<pre><code>&lt;script type="module" src="/dist/index.js"&gt;&lt;/script&gt;</code></pre>
 		</li>
 		<li>
 			观察要点：

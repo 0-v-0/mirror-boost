@@ -1,109 +1,114 @@
 import 'uno.css'
+import { CydonElement, watch } from 'cydon'
 import { error, success } from '@cydon/ui/Message'
 import '@cydon/ui/src/c-message.css'
 
-function qs(id) { return document.getElementById(id) }
-
-async function load() {
-	const data = await new Promise((res) => {
-		if (!chrome?.storage?.local) return res({})
-		chrome.storage.local.get(['settings', 'mirrors'], (items) => res(items || {}))
+type Options = typeof DEFAULT | undefined
+function load() {
+	return new Promise<Options>((res) => {
+		if (!chrome?.storage?.local) return res(void 0)
+		chrome.storage.local.get(['settings', 'mirrors'], (items) => res(items as any))
 	})
-
-	const settings = data.settings || DEFAULT.settings
-	const mirrors = Array.isArray(data.mirrors) ? data.mirrors : DEFAULT.mirrors
-
-	qs('thresholdMs').value = settings.thresholdMs ?? DEFAULT.settings.thresholdMs
-	qs('minSampleCount').value = settings.minSampleCount ?? DEFAULT.settings.minSampleCount
-	qs('mirrors').value = mirrors.join('\n')
 }
 
-async function save() {
-	const threshold = Number(qs('thresholdMs').value) || DEFAULT.settings.thresholdMs
-	const minSamples = Math.max(1, Math.floor(Number(qs('minSampleCount').value) || DEFAULT.settings.minSampleCount))
-	const mirrorsText = qs('mirrors').value.trim()
-	const mirrors = mirrorsText ? mirrorsText.split('\n').map(s => s.trim()).filter(Boolean) : []
+function parseUrls(text: string) {
+	return text.trim().split('\n').map(s => s.trim()).filter(Boolean)
+}
 
-	const payload = {
-		settings: {
-			thresholdMs: threshold,
-			minSampleCount: minSamples,
-			enableLogging: DEFAULT.settings.enableLogging,
-			writeBatchMs: DEFAULT.settings.writeBatchMs,
-		},
-		mirrors,
+class MbOptions extends CydonElement {
+	inputFile!: HTMLInputElement
+
+	thresholdMs!: number
+	minSampleCount!: number
+	enableLogging!: boolean
+	writeBatchMs!: number
+	mirrors!: string
+
+	async connectedCallback() {
+		await this.load()
+		watch(this, function () {
+			this.save()
+		})
+		super.connectedCallback()
 	}
 
-	await chromeSet(payload)
-	success('已保存')
-}
+	async load(cfg?: Options) {
+		cfg ||= await load()
+		if (cfg) {
+			this.thresholdMs = cfg.settings?.thresholdMs ?? DEFAULT.settings.thresholdMs
+			this.minSampleCount = cfg.settings?.minSampleCount ?? DEFAULT.settings.minSampleCount
+			this.enableLogging = cfg.settings?.enableLogging ?? DEFAULT.settings.enableLogging
+			this.writeBatchMs = cfg.settings?.writeBatchMs ?? DEFAULT.settings.writeBatchMs
+			this.mirrors = Array.isArray(cfg.mirrors) ? cfg.mirrors.join('\n') : DEFAULT.mirrors.join('\n')
+		}
+	}
 
-async function resetDefaults() {
-	await chromeSet(DEFAULT)
-	await load()
-	success('已重置为默认')
-}
-
-function exportJson() {
-	const obj = {
-		v: 1,
-		data: {
+	async save() {
+		const payload = {
 			settings: {
-				thresholdMs: Number(qs('thresholdMs').value) || DEFAULT.settings.thresholdMs,
-				minSampleCount: Number(qs('minSampleCount').value) || DEFAULT.settings.minSampleCount,
+				thresholdMs: this.thresholdMs,
+				minSampleCount: Math.max(1, this.minSampleCount),
+				enableLogging: this.enableLogging,
+				writeBatchMs: this.writeBatchMs,
 			},
-			mirrors: qs('mirrors').value.split('\n').map(s => s.trim()).filter(Boolean),
+			mirrors: parseUrls(this.mirrors),
 		}
+		await chromeSet(payload)
 	}
-	const json = JSON.stringify(obj)
-	const blob = new Blob([json], { type: 'application/json' })
-	const url = URL.createObjectURL(blob)
-	const a = document.createElement('a')
-	a.href = url
-	a.download = 'mirrorboost-config.json'
-	a.click()
-	URL.revokeObjectURL(url)
-}
 
-function handleImportFile(file) {
-	const reader = new FileReader()
-	reader.onload = async () => {
-		try {
-			const parsed = JSON.parse(reader.result)
-			if (!parsed || !parsed.data) throw new Error('invalid format')
-			const { settings, mirrors } = parsed.data
-			// basic validation
-			if (settings) {
-				qs('thresholdMs').value = Number(settings.thresholdMs) || DEFAULT.settings.thresholdMs
-				qs('minSampleCount').value = Number(settings.minSampleCount) || DEFAULT.settings.minSampleCount
+	async reset() {
+		await chromeSet(DEFAULT)
+		await load()
+		success('已重置为默认')
+	}
+
+	exportJson() {
+		const obj = {
+			v: 1,
+			data: {
+				settings: {
+					thresholdMs: this.thresholdMs,
+					minSampleCount: this.minSampleCount,
+				},
+				mirrors: this.mirrors.split('\n').map(s => s.trim()).filter(Boolean),
 			}
-			if (Array.isArray(mirrors)) {
-				qs('mirrors').value = mirrors.join('\n')
-			}
-			await save()
-			success('导入并保存成功')
-		} catch {
-			error('导入失败: 无效的JSON')
 		}
+		const json = JSON.stringify(obj)
+		const blob = new Blob([json], { type: 'application/json' })
+		const url = URL.createObjectURL(blob)
+		const a = document.createElement('a')
+		a.href = url
+		a.download = 'mirrorboost-config.json'
+		a.click()
+		URL.revokeObjectURL(url)
 	}
-	reader.readAsText(file)
+	handleImportFile(file: File) {
+		const reader = new FileReader()
+		reader.onload = async () => {
+			try {
+				const parsed = JSON.parse(reader.result as string,)
+				const data = parsed?.data
+				if (!data) throw new Error('invalid format')
+				await this.load({
+					settings: data.settings,
+					mirrors: data.mirrors,
+				})
+				await this.save()
+				success('导入并保存成功')
+			} catch {
+				error('导入失败: 无效的JSON')
+			}
+		}
+		reader.readAsText(file)
+	}
+
+	importFile() {
+		this.inputFile.click()
+	}
+
+	onChange(e: Event) {
+		const f = (e.target as HTMLInputElement)?.files?.[0]
+		if (f) this.handleImportFile(f)
+	}
 }
-
-function init() {
-	qs('saveBtn').addEventListener('click', () => save())
-	qs('resetBtn').addEventListener('click', () => resetDefaults())
-	qs('exportBtn').addEventListener('click', () => exportJson())
-	qs('importBtn').addEventListener('click', () => qs('importInput').click())
-
-	qs('importInput').addEventListener('change', (e) => {
-		const f = e.target.files[0]
-		if (f) handleImportFile(f)
-		e.target.value = ''
-	})
-
-	load()
-}
-
-document.addEventListener('DOMContentLoaded', init)
-
-export default {}
+customElements.define('mb-options', MbOptions)

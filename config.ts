@@ -10,7 +10,7 @@ DEFAULT = {
 
 local = chrome.storage?.local
 
-function chromeGet<T = any>(key: string): Promise<T | undefined> {
+chromeGet = function <T = any>(key: string): Promise<T | undefined> {
 	return new Promise((res) => {
 		if (!local) return res(undefined);
 		local.get(key, (items) => {
@@ -18,7 +18,7 @@ function chromeGet<T = any>(key: string): Promise<T | undefined> {
 		});
 	});
 }
-function chromeSet(obj: Record<string, any>): Promise<void> {
+chromeSet = (obj: Record<string, any>): Promise<void> => {
 	return new Promise((res) => {
 		if (!local) return res();
 		local.set(obj, () => res());
