@@ -29,27 +29,5 @@ export async function attemptReplace(el: HTMLLinkElement | HTMLScriptElement, ne
 
 	// Some browsers require urlFilter to be a pattern; using urlFilter with full URL works in Chrome.
 	// Content scripts cannot call declarativeNetRequest directly, so proxy via background.
-	await sendMsg({ message: 'update_rules', rule })
-
-	// Now perform the DOM swap keeping original URL on element so that browser requests originalUrl
-	return new Promise<void>((res, rej) => {
-		const cleanup = () => {
-			el.removeEventListener('load', onLoad)
-			el.removeEventListener('error', onError)
-		}
-
-		const onLoad = () => {
-			cleanup()
-			res()
-		}
-		const onError = (e: Event) => {
-			cleanup()
-			console.log('Error loading resource:', url);
-			//(el as any)[attr] = url // revert to original URL
-			rej((e as ErrorEvent).error)
-		}
-
-		el.addEventListener('load', onLoad)
-		el.addEventListener('error', onError)
-	})
+	return sendMsg({ action: 'update_rules', addRule: rule })
 }

@@ -17,18 +17,18 @@ export class Monitor {
 }
 
 export function collectSriLinks() {
-	const out: SriElement[] = []
+	const map = new Map<string, SriElement>()
 	for (const el of (document.querySelectorAll('script[src][integrity]') as
 		NodeListOf<HTMLScriptElement>)) {
 		const integrity = el.integrity
 		if (integrity)
-			out.push({ el, url: el.src, integrity })
+			map.set(el.src, { el, url: el.src, integrity })
 	}
 	for (const el of (document.querySelectorAll('link[href][integrity]') as
 		NodeListOf<HTMLLinkElement>)) {
 		const integrity = el.integrity
 		if (integrity)
-			out.push({ el, url: el.href, integrity })
+			map.set(el.href, { el, url: el.href, integrity })
 	}
-	return out
+	return map
 }

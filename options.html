@@ -31,7 +31,9 @@
 			style="width: -webkit-fill-available;"></textarea>
 
 		<div class="mt-3">
-			<button @click="reset" class="btn">重置默认</button>
+			<button @click="reset" class="btn btn-error">重置设置</button>
+			<button @click="clearData" class="btn btn-warning">清空统计数据</button>
+			<button @click="clearRules" class="btn btn-warning">清空规则</button>
 			<button @click="exportJson" class="btn">导出</button>
 			<button @click="importFile" class="btn">导入</button>
 			<input ref="inputFile" type="file" accept="application/json" hidden>

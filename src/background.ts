@@ -1,6 +1,7 @@
 import { Aggregator } from './aggregator';
 import { storage } from './storage';
 import { Config } from './types';
+import { Message } from './util';
 
 chrome.action.onClicked.addListener(function () {
 	// open or focus options page.
@@ -17,7 +18,7 @@ chrome.action.onClicked.addListener(function () {
 });
 
 // Helper: simple match check against a rule's condition.urlFilter
-const matchesUrlFilter = (urlFilter: any, url: string) => {
+const urlMatches = (url: string, urlFilter?: string) => {
 	if (!urlFilter) return false;
 	// Many rules use urlFilter as a substring or pattern. For safety,
 	// treat urlFilter as either an exact match or a substring.
@@ -26,6 +27,7 @@ const matchesUrlFilter = (urlFilter: any, url: string) => {
 	}
 	return false;
 }
+const local = chrome.storage?.local
 
 function chromeGet<T = any>(key: string): Promise<T | undefined> {
 	return new Promise((res) => {
@@ -48,13 +50,13 @@ chrome.runtime.onStartup.addListener(async () => {
 	}
 });
 
-chrome.runtime.onMessage.addListener(function (request, _sender, sendResponse) {
-	if (request.message === 'update_rules') {
+chrome.runtime.onMessage.addListener(function (request: Message, _sender, sendResponse) {
+	if (request.action === 'update_rules') {
 		const rule = request.addRule;
 		// If the request is to add a rule (object), check whether the new rule's
 		// redirect target would itself be matched by any existing dynamic rule.
 		if (rule?.action?.redirect?.url) {
-			const ruleId = rule.ruleId;
+			const ruleId = rule.id;
 			const newTarget: string = rule.action.redirect.url;
 			// Fetch existing dynamic rules to check for conflicts
 			chrome.declarativeNetRequest.getDynamicRules((existingRules = []) => {
@@ -71,9 +73,9 @@ chrome.runtime.onMessage.addListener(function (request, _sender, sendResponse) {
 						if (r.condition.urlFilter === rule.condition.urlFilter) {
 							return;
 						}
-						if (matchesUrlFilter(r.condition.urlFilter, newTarget)) {
+						if (urlMatches(newTarget, r.condition.urlFilter)) {
 							// Found an existing rule that would redirect the new target.
-							//sendResponse({ ruleId, error: { message: 'redirect_target_conflict', details: { existingRuleId: r.id, existingRule: r } } });
+							//sendResponse({ ruleId, error: { action: 'redirect_target_conflict', details: { existingRuleId: r.id, existingRule: r } } });
 							//return;
 							ids.push(r.id);
 						}
@@ -104,19 +106,19 @@ chrome.runtime.onMessage.addListener(function (request, _sender, sendResponse) {
 		}
 		return true;
 	}
-	if (request.message === 'get_rules') {
+	if (request.action === 'get_rules') {
 		chrome.declarativeNetRequest.getDynamicRules((rules) => {
 			sendResponse({ rules, error: chrome.runtime.lastError })
 		})
 		return true;
 	}
-	if (request.message === 'aggregate') {
+	if (request.action === 'aggregate') {
 		const aggregator = new Aggregator(request.config)
 		aggregator.aggregate(request.samples);
 		sendResponse({});
 		return true;
 	}
-	if (request.message === 'clear_expired') {
+	if (request.action === 'clear_expired') {
 		const config = request.config;
 		const aggregator = new Aggregator(config)
 		aggregator.clearExpired(config.ttlMs).then(() => {
@@ -124,11 +126,16 @@ chrome.runtime.onMessage.addListener(function (request, _sender, sendResponse) {
 		});
 		return true;
 	}
-	if (request.message === 'get_integrity') {
+	if (request.action === 'get_integrity') {
 		storage.getIntegrity(request.key).then((map) => {
 			sendResponse({ urls: map?.urls });
 		});
 		return true;
+	}
+	if (request.action === 'clear_db') {
+		storage.clear().then(() => {
+			sendResponse({});
+		});
 	}
 	return false;
 });

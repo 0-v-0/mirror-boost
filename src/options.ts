@@ -1,22 +1,24 @@
 import 'uno.css'
 import { CydonElement, watch } from 'cydon'
 import { error, success } from '@cydon/ui/Message'
+import { Message } from './util'
 import '@cydon/ui/src/c-message.css'
 
 type Options = typeof DEFAULT | undefined
 
-const sendMsg = (msg: any) => new Promise<any>((res, rej) => {
+const sendMsg = (msg: Message) => new Promise<any>((res, rej) => {
 	chrome.runtime.sendMessage(msg, (resp) => {
 		const err = chrome.runtime.lastError || resp?.error;
 		if (err) return rej(err);
 		res(resp);
 	});
 });
+const getRules = async (): Promise<chrome.declarativeNetRequest.Rule[]> => (await sendMsg({ action: 'get_rules' }))?.rules || []
 function load() {
 	const cfg = new Promise<Options>((res) => {
 		if (!chrome?.storage?.local) return res(void 0)
 		chrome.storage.local.get(['settings'], async (items) => {
-			const rules: chrome.declarativeNetRequest.Rule[] = await sendMsg({ message: 'get_rules' }) || []
+			const rules = await getRules()
 			res({ ...items, rules: JSON.stringify(rules, null, 2) } as any)
 		})
 	})
@@ -67,21 +69,21 @@ class MbOptions extends CydonElement {
 	async reset() {
 		await chromeSet(DEFAULT)
 		await load()
-		success('已重置为默认')
+		success('已重置设置')
 	}
 
 	async clearData() {
-		// TODO
-		success('已清空所有数据')
+		await sendMsg({ action: 'clear_db' })
+		success('已清空统计数据')
 	}
 
 	async clearRules() {
-		const rules: chrome.declarativeNetRequest.Rule[] = await sendMsg({ message: 'get_rules' }) || []
+		const rules = await getRules()
 		if (rules.length) {
-			await sendMsg({ message: 'update_rules', removeRuleIds: rules.map(r => r.id) })
+			console.log(`removing ${rules.length} rules`)
+			await sendMsg({ action: 'update_rules', removeRuleIds: rules.map(r => r.id) })
 		}
 		this.rules = ''
-		await this.save()
 		success('已清空所有规则')
 	}
 
@@ -105,6 +107,7 @@ class MbOptions extends CydonElement {
 		a.click()
 		URL.revokeObjectURL(url)
 	}
+
 	handleImportFile(file: File) {
 		const reader = new FileReader()
 		reader.onload = async () => {

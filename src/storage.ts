@@ -1,4 +1,4 @@
-import { openDB, IDBPDatabase } from 'idb'
+import { openDB, deleteDB } from 'idb'
 
 type DBSchema = {
 	stats: { key: string; };
@@ -7,11 +7,7 @@ type DBSchema = {
 }
 
 export class KVStorage {
-	private dbPromise: Promise<IDBPDatabase<DBSchema>>
-
-	constructor() {
-		this.dbPromise = this.initDB()
-	}
+	private dbPromise = this.initDB()
 
 	private initDB() {
 		return openDB<DBSchema>('mirror-boost-db', 1, {
@@ -131,6 +127,14 @@ export class KVStorage {
 			console.error('[storage] writeBatchIntegrity error', e)
 			try { tx.abort() } catch { /* ignore */ }
 		}
+	}
+
+	async clear() {
+		const db = await this.dbPromise
+		const name = db.name
+		db.close()
+		await deleteDB(name)
+		this.dbPromise = this.initDB()
 	}
 }
 
