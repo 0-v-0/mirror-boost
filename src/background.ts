@@ -3,20 +3,6 @@ import { storage } from './storage';
 import { Config } from './types';
 import { Message } from './util';
 
-chrome.action.onClicked.addListener(function () {
-	// open or focus options page.
-	const optionsUrl = chrome.runtime.getURL('options.html');
-	chrome.tabs.query({}, function (extensionTabs) {
-		for (let i = 0, len = extensionTabs.length; i < len; i++) {
-			if (optionsUrl === extensionTabs[i].url) {
-				chrome.tabs.update(extensionTabs[i].id, { selected: true });
-				return;
-			}
-		}
-		chrome.tabs.create({ url: optionsUrl });
-	});
-});
-
 // Helper: simple match check against a rule's condition.urlFilter
 const urlMatches = (url: string, urlFilter?: string) => {
 	if (!urlFilter) return false;

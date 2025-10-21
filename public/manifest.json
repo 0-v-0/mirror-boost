@@ -10,7 +10,8 @@
 	"action": {
 		"default_icon": {
 			"16": "icons/icon16.png"
-		}
+		},
+		"default_popup": "popup.html"
 	},
 	"options_ui": {
 		"page": "options.html"
@@ -47,6 +48,16 @@
 				"config.js",
 				"idle.js"
 			]
+		}
+		,
+		{
+			"matches": [
+				"*://*/*"
+			],
+			"js": [
+				"content_timing.js"
+			],
+			"run_at": "document_idle"
 		}
 	],
 	"manifest_version": 3
