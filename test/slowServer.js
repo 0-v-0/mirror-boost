@@ -10,7 +10,7 @@ function parseArg(name, fallback) {
 	return fallback
 }
 
-const port = parseInt(parseArg('port', process.env.PORT || '8000'), 10)
+const port = parseInt(parseArg('port', process.env.PORT || '7888'), 10)
 const delay = parseInt(parseArg('delay', process.env.DELAY || '2000'), 10)
 const root = resolve(dirname(fileURLToPath(import.meta.url)))
 

@@ -4,9 +4,9 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1">
 	<title>替换流程测试页面</title>
-	<!-- 初始引用：模拟本地慢资源（在本地通过 http://localhost:8000/remedy.min.css 提供） -->
+	<!-- 初始引用：模拟本地慢资源（在本地通过 http://localhost:7888/remedy.min.css 提供） -->
 	<!-- 带 integrity 属性以便扩展只在有 integrity 时尝试替换 -->
-	<link rel="stylesheet" href="http://localhost:8000/remedy.min.css" integrity="sha256-Dw1XyODgJ9BsZZHV8/XIpkI3Bl+hcUxKsd8/JPh7zeU=" crossorigin="anonymous">
+	<link rel="stylesheet" href="http://localhost:7888/remedy.min.css" integrity="sha256-Dw1XyODgJ9BsZZHV8/XIpkI3Bl+hcUxKsd8/JPh7zeU=" crossorigin="anonymous">
 	<!-- 预期替换目标（示例，扩展替换后应变为此 CDN 链接）： -->
 	<!-- https://cdn.jsdelivr.net/npm/cssremedy@0.1.0-beta.2/css/remedy.min.css -->
 </head>
@@ -15,9 +15,9 @@
 	<p>该页面用于测试扩展是否会将慢链接替换为快速 CDN。步骤：</p>
 	<ol>
 		<li>
-			在一个终端中启动慢资源服务器（用于模拟慢 CSS），默认端口 8000、延迟 2000ms：
-			<pre><code>node ./test/slowServer.js --port 8000 --delay 2000</code></pre>
-			本页面中引用的慢资源： <code>http://localhost:8000/remedy.min.css</code>
+			在一个终端中启动慢资源服务器（用于模拟慢 CSS），默认端口 7888、延迟 2000ms：
+			<pre><code>node ./test/slowServer.js --port 7888 --delay 2000</code></pre>
+			本页面中引用的慢资源： <code>http://localhost:7888/remedy.min.css</code>
 		</li>
 		<li>
 			在另一个终端中启动一个静态文件服务器以访问测试页面（或使用 Vite dev）：
@@ -39,7 +39,7 @@ document.head.appendChild(s);
 		<li>
 			观察要点：
 			<ul>
-				<li>Network 面板：最初请求为 <code>http://localhost:8000/remedy.min.css</code>（响应延迟约为设定的 delay）。</li>
+				<li>Network 面板：最初请求为 <code>http://localhost:7888/remedy.min.css</code>（响应延迟约为设定的 delay）。</li>
 				<li>当样本数达到阈值（默认最小样本数 3）且 avgMs &gt;= 默认阈值 300ms 时，扩展会尝试用候选 CDN URL 进行替换。替换后应能在 Network 中看到对 CDN 链接的请求（或在 DOM 中观察到新加入的 &lt;link&gt; 元素的 href 变化）。</li>
 				<li>若启用了日志（见步骤 2），Console 会输出替换尝试与结果；若替换失败或 SRI 校验失败，应回退到原资源。</li>
 			</ul>
