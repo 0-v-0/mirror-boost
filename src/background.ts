@@ -1,6 +1,5 @@
 import { Aggregator } from './aggregator';
 import { storage } from './storage';
-import { Config } from './types';
 import { Message } from './util';
 
 // Helper: simple match check against a rule's condition.urlFilter

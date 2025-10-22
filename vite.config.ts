@@ -18,6 +18,7 @@ export default defineConfig({
 				config: path.resolve(__dirname, 'config.ts'),
 				idle: path.resolve(__dirname, 'src/idle.ts'),
 				index: path.resolve(__dirname, 'src/index.ts'),
+				timing: path.resolve(__dirname, 'src/timing.ts'),
 			},
 		},
 		modulePreload: false,

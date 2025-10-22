@@ -55,7 +55,7 @@
 				"*://*/*"
 			],
 			"js": [
-				"content_timing.js"
+				"timing.js"
 			],
 			"run_at": "document_idle"
 		}

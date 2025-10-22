@@ -9,6 +9,7 @@
 		"dev": "vite",
 		"serve": "node ./test/slowServer.js",
 		"typecheck": "tsc --noEmit",
+		"lint": "pnpx oxlint",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"author": "",
