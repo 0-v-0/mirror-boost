@@ -11,9 +11,9 @@ openExtEl?.addEventListener('click', (e) => {
 	// open or focus options page.
 	const optionsUrl = chrome.runtime.getURL('options.html');
 	chrome.tabs.query({}, function (extensionTabs) {
-		for (let i = 0, len = extensionTabs.length; i < len; i++) {
-			if (optionsUrl === extensionTabs[i].url) {
-				chrome.tabs.update(extensionTabs[i].id, { selected: true });
+		for (const tab of extensionTabs) {
+			if (optionsUrl === tab.url) {
+				chrome.tabs.update(tab.id, { selected: true });
 				return;
 			}
 		}

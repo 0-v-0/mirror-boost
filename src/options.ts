@@ -96,7 +96,7 @@ class MbOptions extends CydonElement {
 					thresholdMs: this.thresholdMs,
 					minSampleCount: this.minSampleCount,
 				},
-				rules: this.rules.split('\n').map(s => s.trim()).filter(Boolean),
+				rules: JSON.parse(this.rules || '[]'),
 			}
 		}
 		const json = JSON.stringify(obj)
@@ -118,7 +118,7 @@ class MbOptions extends CydonElement {
 				if (!data) throw new Error('invalid format')
 				await this.load({
 					settings: data.settings,
-					rules: data.rules,
+					rules: JSON.stringify(data.rules, null, 2),
 				})
 				await this.save()
 				success('导入并保存成功')
