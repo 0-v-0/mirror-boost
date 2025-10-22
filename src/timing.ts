@@ -4,7 +4,8 @@
 function getResourceType(entry: PerformanceResourceTiming) {
 	// try to map initiatorType / name to simple categories
 	const t = entry.initiatorType.toLowerCase()
-	if (t === 'link') return /\.css(\?|$)/i.test(entry.name) ? 'css' : 'other'
+	if (t === 'link')
+		return /\.css(\?|$)/i.test(entry.name) ? 'css' : /\.(ico|png)(\?|$)/i.test(entry.name) ? 'icon' : null
 	if (t === 'script') return 'js'
 	return null
 }
@@ -40,8 +41,8 @@ if (import.meta.vitest) {
 		it('classifies css link as css', () => {
 			expect(getResourceType(makeEntry('styles.css', 'link', 5))).toBe('css')
 		})
-		it('classifies non-css link as other', () => {
-			expect(getResourceType(makeEntry('favicon.ico', 'link', 5))).toBe('other')
+		it('classifies non-css link as icon', () => {
+			expect(getResourceType(makeEntry('favicon.ico', 'link', 5))).toBe('icon')
 		})
 		it('returns null for unknown types', () => {
 			expect(getResourceType(makeEntry('font.woff2', 'font', 5))).toBeNull()
@@ -71,7 +72,7 @@ if (import.meta.vitest) {
 			const res = aggregateTimings(entries)
 			expect(res.js).toBeUndefined()
 			expect(res.css).toBeUndefined()
-			expect(res.other).toBeUndefined()
+			expect(res.icon).toBeUndefined()
 		})
 	})
 } else {

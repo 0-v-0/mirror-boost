@@ -1,3 +1,4 @@
+import { Rule } from 'types'
 import { sendMsg } from './util'
 
 export async function attemptReplace(el: HTMLLinkElement | HTMLScriptElement, newUrl: string, _integrity?: string) {
@@ -14,7 +15,7 @@ export async function attemptReplace(el: HTMLLinkElement | HTMLScriptElement, ne
 	const ruleId = Math.floor(Math.random() * 0x7FFFFFFE) + 1
 
 	// Build DNR rule to redirect originalUrl to newUrl. Match as exact URL.
-	const rule: chrome.declarativeNetRequest.Rule = {
+	const rule: Rule = {
 		id: ruleId,
 		priority: 1,
 		action: {

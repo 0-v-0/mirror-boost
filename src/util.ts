@@ -1,10 +1,10 @@
-import { Config, Sample } from './types';
+import { Config, Rule, Sample } from './types';
 
 export type Message = {
 	action: 'get_rules'
 } | {
 	action: 'update_rules'
-	addRule?: chrome.declarativeNetRequest.Rule
+	addRule?: Rule
 	removeRuleIds?: number[]
 } | {
 	action: 'get_integrity'

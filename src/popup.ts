@@ -8,8 +8,17 @@ const openExtEl = el('openExt')
 
 openExtEl?.addEventListener('click', (e) => {
     e.preventDefault()
-    // open options page
-    chrome.runtime.openOptionsPage?.()
+	// open or focus options page.
+	const optionsUrl = chrome.runtime.getURL('options.html');
+	chrome.tabs.query({}, function (extensionTabs) {
+		for (let i = 0, len = extensionTabs.length; i < len; i++) {
+			if (optionsUrl === extensionTabs[i].url) {
+				chrome.tabs.update(extensionTabs[i].id, { selected: true });
+				return;
+			}
+		}
+		chrome.tabs.create({ url: optionsUrl });
+	});
 })
 
 function colorForMs(ms: number) {
@@ -33,7 +42,7 @@ function render(data: PopupData) {
         return
     }
     statusEl.textContent = ''
-    for (const t of ['css', 'js', 'image']) {
+    for (const t of ['css', 'js', 'icon']) {
         const item = data[t]
         if (!item) {
             // show no data row

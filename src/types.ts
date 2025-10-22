@@ -64,6 +64,9 @@ export type Config = {
 	ttlMs: number
 }
 
+/** Chrome declarativeNetRequest.Rule type alias for convenience. */
+export type Rule = chrome.declarativeNetRequest.Rule
+
 /**
  * A DOM element (link or script) together with its resolved URL and integrity
  * attribute value.

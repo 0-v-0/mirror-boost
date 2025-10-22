@@ -1,6 +1,7 @@
 import 'uno.css'
 import { CydonElement, watch } from 'cydon'
 import { error, success } from '@cydon/ui/Message'
+import { Rule } from './types'
 import { Message } from './util'
 import '@cydon/ui/src/c-message.css'
 
@@ -13,7 +14,7 @@ const sendMsg = (msg: Message) => new Promise<any>((res, rej) => {
 		res(resp);
 	});
 });
-const getRules = async (): Promise<chrome.declarativeNetRequest.Rule[]> => (await sendMsg({ action: 'get_rules' }))?.rules || []
+const getRules = async (): Promise<Rule[]> => (await sendMsg({ action: 'get_rules' }))?.rules || []
 function load() {
 	const cfg = new Promise<Options>((res) => {
 		if (!chrome?.storage?.local) return res(void 0)

@@ -1,5 +1,6 @@
 import { Aggregator } from './aggregator';
 import { storage } from './storage';
+import { Rule } from './types';
 import { Message } from './util';
 
 // Helper: simple match check against a rule's condition.urlFilter
@@ -24,10 +25,18 @@ function chromeGet<T = any>(key: string): Promise<T | undefined> {
 }
 
 chrome.runtime.onStartup.addListener(async () => {
-	const cfg = await chromeGet<chrome.declarativeNetRequest.Rule[]>('rules')
+	const cfg = await chromeGet<string>('rules')
 	if (cfg?.length) {
+		const rules: Rule[] = JSON.parse(cfg);
+		const map = new Map<string | undefined, number>();
+		for (const r of rules) {
+			if (map.has(r.condition.urlFilter)) continue;
+			const id = map.size + 1;
+			map.set(r.condition.urlFilter, id);
+			r.id = id;
+		}
 		chrome.declarativeNetRequest.updateDynamicRules({
-			addRules: cfg,
+			addRules: rules.filter(r => r.id),
 			removeRuleIds: []
 		}, () => {
 			/* ignore */
@@ -93,6 +102,9 @@ chrome.runtime.onMessage.addListener(function (request: Message, _sender, sendRe
 	}
 	if (request.action === 'get_rules') {
 		chrome.declarativeNetRequest.getDynamicRules((rules) => {
+			for (const r of rules as { id?: number }[]) {
+				delete r.id;
+			}
 			sendResponse({ rules, error: chrome.runtime.lastError })
 		})
 		return true;

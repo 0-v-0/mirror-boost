@@ -54,7 +54,7 @@ chromeGet<Config>('settings').then((cfg = DEFAULT.settings) => {
 		// load stats and integrity_map keys from storage
 		// compute per-host average durations from Resource Timing API for the detected resources
 		if (cfg.enableLogging && byUrl.size) {
-			console.log(`[mb] attempting replacements for ${byUrl.size} sri-protected resources`)
+			console.log(`[mb] found ${byUrl.size} sri-protected resources`)
 		}
 		const hostDurations: Record<string, number[]> = {}
 		try {
