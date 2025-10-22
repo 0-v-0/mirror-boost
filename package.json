@@ -9,7 +9,7 @@
 		"dev": "vite",
 		"serve": "node ./test/slowServer.js",
 		"typecheck": "tsc --noEmit",
-		"lint": "pnpx oxlint",
+		"lint": "pnpx oxlint --max-warnings=100",
 		"test": "vitest run"
 	},
 	"author": "",

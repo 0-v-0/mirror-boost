@@ -1,10 +1,10 @@
 # MirrorBoost
 
-Optimizes website load performance by securely redirecting resources to mirror servers
+Optimizes website loading performance by securely redirecting static resources to those from mirror servers.
 
 **Supported Browsers**
 
-- Chrome
+- Chrome 84+
 - Microsoft Edge
 
 ## Build
@@ -14,5 +14,5 @@ pnpm build
 ```
 
 ## Tech Stack
-* Frontend: [daisyUI](https://daisyui.com/), [TypeScript](https://www.typescriptlang.org/), [UnoCSS](https://github.com/unocss/unocss)
+* Frontend: [Cydon](https://github.com/0-v-0/cydon/tree/fix-csp), [daisyUI](https://daisyui.com/), [TypeScript](https://www.typescriptlang.org/), [UnoCSS](https://github.com/unocss/unocss)
 * Build: [vite](https://vitejs.dev/)
