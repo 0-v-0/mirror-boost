@@ -14,6 +14,7 @@ export default defineConfig({
 		rollupOptions: {
 			input: {
 				options: path.resolve(__dirname, 'options.html'),
+				popup: path.resolve(__dirname, 'popup.html'),
 				background: path.resolve(__dirname, 'src/background.ts'),
 				config: path.resolve(__dirname, 'config.ts'),
 				idle: path.resolve(__dirname, 'src/idle.ts'),
@@ -25,4 +26,10 @@ export default defineConfig({
 		outDir: 'dist',
 	},
 	plugins: [UnoCSS()],
+	test: {
+		includeSource: ['src/timing.ts'],
+	},
+	define: {
+		'import.meta.vitest': 'undefined',
+	},
 })

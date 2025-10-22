@@ -1,40 +1,89 @@
 // Injected into pages; responds to messages to return aggregated resource timing
+/// <reference types="vitest/importMeta" />
 
 function getResourceType(entry: PerformanceResourceTiming) {
 	// try to map initiatorType / name to simple categories
 	const t = entry.initiatorType.toLowerCase()
 	if (t === 'link') return /\.css(\?|$)/i.test(entry.name) ? 'css' : 'other'
-	if (t === 'script' || /\.js(\?|$)/i.test(entry.name)) return 'js'
+	if (t === 'script') return 'js'
 	return null
 }
 
-function aggregateTimings() {
-	const entries = (performance.getEntriesByType('resource') as PerformanceResourceTiming[]) || []
+function aggregateTimings(entries: PerformanceEntryList) {
 	const types: Record<string, { sum: number; count: number }> = {}
 	for (const e of entries) {
-		// consider only completed resources with transferSize > 0 or responseEnd > 0
-		// transferSize might be 0 for cross-origin without timing-allow-origin; use responseEnd - startTime > 0
-		const duration = (e.responseEnd && e.startTime) ? (e.responseEnd - e.startTime) : (e.duration || 0)
-		if (!duration || duration <= 0) continue
-		const rt = getResourceType(e)
+		const duration = e.duration
+		if (duration <= 0) continue
+		const rt = getResourceType(e as PerformanceResourceTiming)
 		if (!rt) continue
-		if (!types[rt]) types[rt] = { sum: 0, count: 0 }
+		types[rt] ||= { sum: 0, count: 0 }
 		types[rt].sum += duration
-		types[rt].count += 1
+		types[rt].count++
 	}
 	return types
 }
 
-chrome.runtime.onMessage.addListener((msg: any, _sender: any, sendResponse: (resp: any) => void) => {
-	if (msg?.type === 'get_resource_timing') {
-		try {
-			const data = aggregateTimings()
-			sendResponse(data)
-		} catch (err: any) {
-			sendResponse({ error: err && err.message ? err.message : String(err) })
-		}
-		return true
-	}
-	return false
-})
+if (import.meta.vitest) {
+	const { describe, it, expect } = import.meta.vitest
 
+	function makeEntry(name: string, initiatorType: string, duration: number) {
+		return {
+			name,
+			initiatorType,
+			duration,
+		} as unknown as PerformanceResourceTiming
+	}
+	describe('getResourceType', () => {
+		it('classifies script as js', () => {
+			expect(getResourceType(makeEntry('a.js', 'script', 10))).toBe('js')
+		})
+		it('classifies css link as css', () => {
+			expect(getResourceType(makeEntry('styles.css', 'link', 5))).toBe('css')
+		})
+		it('classifies non-css link as other', () => {
+			expect(getResourceType(makeEntry('favicon.ico', 'link', 5))).toBe('other')
+		})
+		it('returns null for unknown types', () => {
+			expect(getResourceType(makeEntry('font.woff2', 'font', 5))).toBeNull()
+		})
+	})
+
+	describe('aggregateTimings', () => {
+		it('aggregates durations by type', () => {
+			const entries = [
+				makeEntry('a.js', 'script', 10),
+				makeEntry('b.js', 'script', 15),
+				makeEntry('s.css', 'link', 5),
+			]
+			const res = aggregateTimings(entries)
+			expect(res.js.count).toBe(2)
+			expect(res.js.sum).toBe(25)
+			expect(res.css.count).toBe(1)
+			expect(res.css.sum).toBe(5)
+		})
+
+		it('ignores non-positive durations and unknown types', () => {
+			const entries = [
+				makeEntry('a.js', 'script', 0),
+				makeEntry('b.js', 'script', -5),
+				makeEntry('c.woff2', 'font', 20),
+			]
+			const res = aggregateTimings(entries)
+			expect(res.js).toBeUndefined()
+			expect(res.css).toBeUndefined()
+			expect(res.other).toBeUndefined()
+		})
+	})
+} else {
+	chrome.runtime.onMessage.addListener((msg: any, _sender: any, sendResponse: (resp: any) => void) => {
+		if (msg?.type === 'get_resource_timing') {
+			try {
+				sendResponse(aggregateTimings(performance.getEntriesByType('resource')))
+			} catch (err) {
+				sendResponse({ error: err })
+			}
+			return true
+		}
+		return false
+	})
+}
