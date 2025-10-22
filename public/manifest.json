@@ -46,15 +46,6 @@
 			],
 			"js": [
 				"config.js",
-				"idle.js"
-			]
-		}
-		,
-		{
-			"matches": [
-				"*://*/*"
-			],
-			"js": [
 				"timing.js"
 			],
 			"run_at": "document_idle"

@@ -1,5 +1,6 @@
 // Injected into pages; responds to messages to return aggregated resource timing
 /// <reference types="vitest/importMeta" />
+import { Config } from './types'
 
 function getResourceType(entry: PerformanceResourceTiming) {
 	// try to map initiatorType / name to simple categories
@@ -27,13 +28,11 @@ function aggregateTimings(entries: PerformanceEntryList) {
 if (import.meta.vitest) {
 	const { describe, it, expect } = import.meta.vitest
 
-	function makeEntry(name: string, initiatorType: string, duration: number) {
-		return {
-			name,
-			initiatorType,
-			duration,
-		} as unknown as PerformanceResourceTiming
-	}
+	const makeEntry = (name: string, initiatorType: string, duration: number) => ({
+		name,
+		initiatorType,
+		duration,
+	} as PerformanceResourceTiming)
 	describe('getResourceType', () => {
 		it('classifies script as js', () => {
 			expect(getResourceType(makeEntry('a.js', 'script', 10))).toBe('js')
@@ -83,8 +82,13 @@ if (import.meta.vitest) {
 			} catch (err) {
 				sendResponse({ error: err })
 			}
-			return true
 		}
-		return false
 	})
+
+	chromeGet<Config>('settings').then((cfg = DEFAULT.settings) => {
+		chrome.runtime.sendMessage({
+			action: 'clear_expired',
+			config: cfg,
+		});
+	});
 }
