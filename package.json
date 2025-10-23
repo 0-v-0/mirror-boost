@@ -12,8 +12,8 @@
 		"lint": "pnpx oxlint --max-warnings=100",
 		"test": "vitest run"
 	},
-	"author": "",
-	"license": "ISC",
+	"author": "0-v-0",
+	"license": "Apache-2.0",
 	"dependencies": {
 		"@cydon/ui": "link:..\\cydon\\packages\\ui",
 		"cydon": "link:..\\cydon\\packages\\cydon",

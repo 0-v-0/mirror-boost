@@ -4,9 +4,9 @@ function el(id: string) { return document.getElementById(id)! }
 
 const statusEl = el('status')
 const listEl = el('list')
-const openExtEl = el('openExt')
+const optionsEl = el('options')
 
-openExtEl?.addEventListener('click', (e) => {
+optionsEl?.addEventListener('click', (e) => {
     e.preventDefault()
 	// open or focus options page.
 	const optionsUrl = chrome.runtime.getURL('options.html');

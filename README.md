@@ -1,4 +1,4 @@
-# MirrorBoost
+# Mirror Boost
 
 Optimizes website loading performance by securely redirecting static resources to those from mirror servers.
 
