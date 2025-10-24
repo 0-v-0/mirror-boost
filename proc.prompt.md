@@ -13,4 +13,12 @@
 ---
 目录结构已经变化，根据当前工作区更新任务文档中的文件名
 ---
+将Aggregator中的统计信息改为使用IndexedDB存储，遵循docs中文档中的存储格式，aggregator.ts不应直接导入idb模块，数据库操作应封装在storage.ts
+---
 给types.ts中所有导出的类型添加文档注释
+---
+实现clearExpired函数，清除过期的统计数据
+---
+根据需求文档，添加popup.html，显示当前页面每个类型的资源的平均加载时间
+---
+修改background.ts，确保新添加的规则不会被已有规则再次重定向
